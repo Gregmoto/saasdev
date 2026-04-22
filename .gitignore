@@ -3,4 +3,4 @@ dist/
 .env
 *.local
 .DS_Store
-src/db/migrations/
+# migrations are committed to version control — do NOT ignore this directory

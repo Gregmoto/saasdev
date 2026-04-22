@@ -6,6 +6,7 @@ import dbPlugin from "./plugins/db.js";
 import redisPlugin from "./plugins/redis.js";
 import sessionPlugin from "./plugins/session.js";
 import rateLimitPlugin from "./plugins/rate-limit.js";
+import routeGuardPlugin from "./plugins/route-guard.js";
 
 import authModule from "./modules/auth/index.js";
 import storeAccountsModule from "./modules/store-accounts/index.js";
@@ -28,6 +29,9 @@ export function buildApp() {
   app.register(redisPlugin);
   app.register(sessionPlugin); // depends on redisPlugin
   app.register(rateLimitPlugin);
+  // routeGuardPlugin must be registered before any route modules so its
+  // onRoute hook is active when those modules register their routes.
+  app.register(routeGuardPlugin);
 
   app.register(healthRoutes);
   app.register(authModule);

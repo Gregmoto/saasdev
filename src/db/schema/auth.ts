@@ -10,9 +10,28 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import { storeAccounts } from "./store-accounts.js";
 
-// Global user identities — one row per person.
-// Access to a store account is controlled via store_memberships.
+/**
+ * auth_users is a GLOBAL identity table — one row per person, not per store.
+ *
+ * Rationale: a person can be a member of multiple store accounts (e.g. an
+ * agency managing several shops, or a MULTISHOP owner). Duplicating rows per
+ * store would mean multiple passwords, multiple TOTP secrets, and a fragmented
+ * identity that breaks cross-store SSO and future OAuth flows.
+ *
+ * Access control is entirely in store_memberships (store_account_id + user_id
+ * + role). The requireStoreAccountContext() guard enforces this at the request
+ * level — it verifies the user has an active membership in the store account
+ * resolved from the hostname before any handler runs.
+ *
+ * home_store_account_id (nullable):
+ *   The user's default/preferred store account — used by the MultiShop
+ *   account-switcher UI to know which store to land on after login when the
+ *   incoming URL doesn't already resolve a specific store. It is NOT an
+ *   access-control boundary; the authoritative check is always store_memberships.
+ *   Set to NULL for users with no memberships yet (e.g. during invite flow).
+ */
 export const authUsers = pgTable(
   "auth_users",
   {
@@ -23,17 +42,27 @@ export const authUsers = pgTable(
     totpEnabled: boolean("totp_enabled").notNull().default(false),
     isActive: boolean("is_active").notNull().default(true),
     lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
+    /**
+     * Default store account for the MultiShop switcher UI.
+     * Set to the earliest membership on registration; updated when the user
+     * explicitly switches stores. Never used for access-control decisions.
+     */
+    homeStoreAccountId: uuid("home_store_account_id").references(
+      () => storeAccounts.id,
+      { onDelete: "set null" },
+    ),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
     emailIdx: uniqueIndex("auth_users_email_idx").on(t.email),
     activeIdx: index("auth_users_active_idx").on(t.isActive),
+    homeStoreIdx: index("auth_users_home_store_idx").on(t.homeStoreAccountId),
   }),
 );
 
-// Session metadata tracked in DB for audit/revocation.
-// The actual session payload lives in Redis under key sess:{id}.
+// Session metadata tracked in DB for audit / forced-revocation.
+// The live session payload (and its TTL) lives in Redis under key sess:{id}.
 export const authSessions = pgTable(
   "auth_sessions",
   {
