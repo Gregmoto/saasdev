@@ -58,7 +58,7 @@ export async function registerStoreAccount(
     await tx.insert(storeMemberships).values({
       storeAccountId: store.id,
       userId: user.id,
-      role: "owner",
+      role: "store_admin",
       acceptedAt: new Date(),
     });
 
