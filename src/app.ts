@@ -8,6 +8,7 @@ import sessionPlugin from "./plugins/session.js";
 import rateLimitPlugin from "./plugins/rate-limit.js";
 import routeGuardPlugin from "./plugins/route-guard.js";
 import supplierQueuePlugin from "./plugins/supplier-queue.js";
+import importQueuePlugin from "./plugins/import-queue.js";
 
 import authModule from "./modules/auth/index.js";
 import storeAccountsModule from "./modules/store-accounts/index.js";
@@ -31,6 +32,7 @@ import reviewsModule from "./modules/reviews/index.js";
 import reportsModule from "./modules/reports/index.js";
 import bundlesModule from "./modules/bundles/index.js";
 import suppliersModule from "./modules/suppliers/index.js";
+import importCenterModule from "./modules/import-center/index.js";
 import { healthRoutes } from "./modules/health/routes.js";
 
 export function buildApp() {
@@ -55,6 +57,8 @@ export function buildApp() {
   app.register(routeGuardPlugin);
   // supplierQueuePlugin depends on dbPlugin and redisPlugin; must come before route modules.
   app.register(supplierQueuePlugin);
+  // importQueuePlugin likewise depends on dbPlugin and redisPlugin.
+  app.register(importQueuePlugin);
 
   app.register(healthRoutes);
   app.register(authModule);
@@ -79,6 +83,7 @@ export function buildApp() {
   app.register(reportsModule);
   app.register(bundlesModule);
   app.register(suppliersModule);
+  app.register(importCenterModule);
 
   app.setErrorHandler((error, _request, reply) => {
     if (error.name === "ZodError") {
