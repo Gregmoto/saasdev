@@ -400,49 +400,4 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     });
   });
 
-  // ── GET /auth/invite/preview ──────────────────────────────────────────────
-  // Public — returns invite metadata for the accept form.
-  app.get("/auth/invite/preview", async (request, reply) => {
-    const token = (request.query as Record<string, string | undefined>)["token"];
-    if (!token) {
-      return reply.status(400).send({ statusCode: 400, error: "Bad Request", message: "Token required" });
-    }
-
-    const { getInvitePreview } = await import("../invites/service.js");
-    const preview = await getInvitePreview(app.db, token);
-
-    if (!preview) {
-      return reply.status(404).send({ statusCode: 404, error: "Not Found", message: "Invalid or expired invite" });
-    }
-
-    return reply.send(preview);
-  });
-
-  // ── POST /auth/invite/accept ──────────────────────────────────────────────
-  app.post(
-    "/auth/invite/accept",
-    { config: { rateLimit: { max: 10, timeWindow: "15 minutes" } } },
-    async (request, reply) => {
-      const { z } = await import("zod");
-      const body = z.object({ token: z.string().min(1), password: z.string().min(8) }).parse(request.body);
-
-      const { acceptInvite } = await import("../invites/service.js");
-      try {
-        const result = await acceptInvite(app.db, { rawToken: body.token, password: body.password });
-
-        request.session.userId = result.userId;
-        request.session.totpVerified = true;
-        request.session.lastActiveStoreAccountId = result.storeAccountId;
-
-        return reply.status(201).send({ userId: result.userId, role: result.role });
-      } catch (err: unknown) {
-        const e = err as { statusCode?: number; message?: string };
-        return reply.status(e.statusCode ?? 400).send({
-          statusCode: e.statusCode ?? 400,
-          error: "Bad Request",
-          message: e.message ?? "Invalid or expired invite token",
-        });
-      }
-    },
-  );
 }

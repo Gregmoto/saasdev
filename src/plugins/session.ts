@@ -14,16 +14,23 @@ class RedisSessionStore {
     private readonly ttlSeconds: number,
   ) {}
 
+  private get isReady(): boolean {
+    return this.redis.status === "ready";
+  }
+
   get(
     sessionId: string,
     cb: (err: Error | null, session: Record<string, unknown> | null) => void,
   ): void {
+    if (!this.isReady) {
+      return cb(null, null); // treat as no session when Redis is down
+    }
     this.redis
       .get(`${this.prefix}${sessionId}`)
       .then((raw: string | null) =>
         cb(null, raw ? (JSON.parse(raw) as Record<string, unknown>) : null),
       )
-      .catch((err: unknown) => cb(err as Error, null));
+      .catch((err: unknown) => cb(null, null)); // swallow Redis errors — no session
   }
 
   set(
@@ -31,17 +38,23 @@ class RedisSessionStore {
     session: Record<string, unknown>,
     cb: (err?: Error) => void,
   ): void {
+    if (!this.isReady) {
+      return cb(); // no-op when Redis is down
+    }
     this.redis
       .setex(`${this.prefix}${sessionId}`, this.ttlSeconds, JSON.stringify(session))
       .then(() => cb())
-      .catch((err: unknown) => cb(err as Error));
+      .catch(() => cb()); // swallow Redis errors
   }
 
   destroy(sessionId: string, cb: (err?: Error) => void): void {
+    if (!this.isReady) {
+      return cb();
+    }
     this.redis
       .del(`${this.prefix}${sessionId}`)
       .then(() => cb())
-      .catch((err: unknown) => cb(err as Error));
+      .catch(() => cb());
   }
 }
 
