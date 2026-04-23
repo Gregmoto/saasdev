@@ -33,7 +33,10 @@ import reportsModule from "./modules/reports/index.js";
 import bundlesModule from "./modules/bundles/index.js";
 import suppliersModule from "./modules/suppliers/index.js";
 import importCenterModule from "./modules/import-center/index.js";
+import csvImportModule from "./modules/csv-import/index.js";
+import cartModule from "./modules/cart/index.js";
 import { healthRoutes } from "./modules/health/routes.js";
+import paymentsModule from "./modules/payments/index.js";
 
 export function buildApp() {
   const loggerOpts: FastifyServerOptions["logger"] =
@@ -84,6 +87,9 @@ export function buildApp() {
   app.register(bundlesModule);
   app.register(suppliersModule);
   app.register(importCenterModule);
+  app.register(csvImportModule);
+  app.register(cartModule);
+  app.register(paymentsModule);
 
   app.setErrorHandler((error, _request, reply) => {
     if (error.name === "ZodError") {

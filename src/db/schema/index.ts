@@ -19,3 +19,5 @@ export * from "./reviews.js";
 export * from "./sync.js";
 export * from "./suppliers.js";
 export * from "./import-center.js";
+export * from "./carts.js";
+export * from "./payments.js";
