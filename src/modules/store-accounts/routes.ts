@@ -30,7 +30,7 @@ export async function storeAccountRoutes(app: FastifyInstance): Promise<void> {
 
     // PATCH /store/settings — owner/admin only
     scoped.patch("/store/settings", async (request, reply) => {
-      if (!["owner", "admin"].includes(request.memberRole)) {
+      if (!["store_admin"].includes(request.memberRole)) {
         return reply.status(403).send({ statusCode: 403, error: "Forbidden", message: "Insufficient role" });
       }
       const patch = request.body as { name?: string; settings?: Record<string, unknown> };

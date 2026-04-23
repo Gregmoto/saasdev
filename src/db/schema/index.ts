@@ -4,3 +4,4 @@ export * from "./memberships.js";
 export * from "./rbac.js";
 export * from "./invites.js";
 export * from "./security.js";
+export * from "./domains.js";

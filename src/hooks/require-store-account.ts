@@ -1,16 +1,19 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { and, eq } from "drizzle-orm";
 import { storeAccounts, storeMemberships } from "../db/schema/index.js";
+import { resolveCustomDomain } from "../modules/domains/service.js";
 import { config } from "../config.js";
 
 /**
  * requireStoreAccountContext — central store-account isolation guard.
  *
  * Resolution order:
- *   1. Parse hostname → subdomain (slug) or custom domain.
- *   2. Load the matching store_account row.
- *   3. Verify currentUser has an active membership in that account.
- *   4. Attach request.storeAccount and request.memberRole.
+ *   1. Impersonation: if session.impersonatedStoreAccountId is set, use that.
+ *   2. Parse hostname → subdomain slug or verified custom domain lookup.
+ *   3. Load the matching store_account row.
+ *   4. Block non-active accounts (pending → 503, suspended → 503, closed → 410).
+ *   5. Verify currentUser has an active membership in that account.
+ *   6. Attach request.storeAccount and request.memberRole.
  *
  * Must run AFTER requireAuth (needs request.currentUser).
  *
@@ -29,6 +32,36 @@ export async function requireStoreAccountContext(
     });
   }
 
+  const db = request.server.db;
+
+  // ── 1. Impersonation shortcut ──────────────────────────────────────────────
+  const impersonatedId = request.session.impersonatedStoreAccountId;
+  if (impersonatedId) {
+    const [account] = await db
+      .select()
+      .from(storeAccounts)
+      .where(eq(storeAccounts.id, impersonatedId))
+      .limit(1);
+
+    if (!account) {
+      return reply.status(404).send({
+        statusCode: 404,
+        error: "Not Found",
+        message: "Impersonated store account not found",
+      });
+    }
+
+    if (sendStatusReply(account.status, reply)) return;
+
+    // Platform admins bypass membership check during impersonation.
+    request.storeAccount = account;
+    request.memberRole = "store_admin";
+    request.isImpersonating = true;
+    request.session.lastActiveStoreAccountId = account.id;
+    return;
+  }
+
+  // ── 2. Resolve from hostname ──────────────────────────────────────────────
   const account = await resolveStoreAccount(request);
   if (!account) {
     return reply.status(404).send({
@@ -38,7 +71,11 @@ export async function requireStoreAccountContext(
     });
   }
 
-  const [membership] = await request.server.db
+  // ── 3. Block on non-active status ─────────────────────────────────────────
+  if (sendStatusReply(account.status, reply)) return;
+
+  // ── 4. Membership check ───────────────────────────────────────────────────
+  const [membership] = await db
     .select({ role: storeMemberships.role })
     .from(storeMemberships)
     .where(
@@ -60,6 +97,7 @@ export async function requireStoreAccountContext(
 
   request.storeAccount = account;
   request.memberRole = membership.role;
+  request.isImpersonating = false;
   request.session.lastActiveStoreAccountId = account.id;
 }
 
@@ -67,20 +105,28 @@ export async function requireStoreAccountContext(
 
 async function resolveStoreAccount(request: FastifyRequest) {
   const hostname = (request.headers["host"] ?? "").split(":")[0] ?? "";
-  const slug = parseSubdomainSlug(hostname, config.BASE_DOMAIN);
   const db = request.server.db;
+
+  const slug = parseSubdomainSlug(hostname, config.BASE_DOMAIN);
+
+  if (slug) {
+    // Subdomain routing: {slug}.{baseDomain}
+    const [account] = await db
+      .select()
+      .from(storeAccounts)
+      .where(eq(storeAccounts.slug, slug))
+      .limit(1);
+    return account ?? null;
+  }
+
+  // Custom domain routing: look up verified custom domain.
+  const row = await resolveCustomDomain(db, hostname);
+  if (!row) return null;
 
   const [account] = await db
     .select()
     .from(storeAccounts)
-    .where(
-      and(
-        slug
-          ? eq(storeAccounts.slug, slug)
-          : eq(storeAccounts.customDomain, hostname),
-        eq(storeAccounts.isActive, true),
-      ),
-    )
+    .where(eq(storeAccounts.id, row.storeAccountId))
     .limit(1);
 
   return account ?? null;
@@ -92,6 +138,44 @@ function parseSubdomainSlug(hostname: string, baseDomain: string): string | null
   if (!hostname.endsWith(suffix)) return null;
   const slug = hostname.slice(0, -suffix.length);
   return slug && !slug.includes(".") ? slug : null;
+}
+
+/**
+ * Sends an appropriate error reply for non-active store statuses and returns
+ * true.  Returns false (without sending) when the account is active so the
+ * caller can continue normally.
+ */
+function sendStatusReply(status: string, reply: FastifyReply): boolean {
+  if (status === "active") return false;
+
+  if (status === "pending" || status === "suspended") {
+    void reply.status(503).send({
+      statusCode: 503,
+      error: "Service Unavailable",
+      message:
+        status === "pending"
+          ? "This store account is pending approval and is not yet accessible."
+          : "This store account is currently suspended.",
+    });
+    return true;
+  }
+
+  if (status === "closed") {
+    void reply.status(410).send({
+      statusCode: 410,
+      error: "Gone",
+      message: "This store account has been closed.",
+    });
+    return true;
+  }
+
+  // Unknown status — treat as unavailable.
+  void reply.status(503).send({
+    statusCode: 503,
+    error: "Service Unavailable",
+    message: "This store account is not accessible.",
+  });
+  return true;
 }
 
 // ---------------------------------------------------------------------------

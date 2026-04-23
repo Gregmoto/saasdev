@@ -39,14 +39,20 @@ export async function registerStoreAccount(
   return await db.transaction(async (tx) => {
     const [store] = await tx
       .insert(storeAccounts)
-      .values({ name: opts.storeName, slug: opts.storeSlug })
+      .values({
+        name: opts.storeName,
+        slug: opts.storeSlug,
+        status: "pending",
+        isActive: false, // blocked until a Platform Super Admin approves it
+        settings: {},
+      })
       .returning({ id: storeAccounts.id });
 
     if (!store) throw new Error("Failed to create store account");
 
     const [user] = await tx
       .insert(authUsers)
-      .values({ email: opts.email, passwordHash })
+      .values({ email: opts.email, passwordHash, homeStoreAccountId: store.id })
       .returning({ id: authUsers.id });
 
     if (!user) throw new Error("Failed to create user");
@@ -55,6 +61,7 @@ export async function registerStoreAccount(
       storeAccountId: store.id,
       userId: user.id,
       role: "store_admin",
+      isActive: false, // activated on approval
       acceptedAt: new Date(),
     });
 
