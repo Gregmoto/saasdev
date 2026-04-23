@@ -24,3 +24,7 @@ export * from "./payments.js";
 export * from "./shipping.js";
 export * from "./tax.js";
 export * from "./fulfillments.js";
+export * from "./refunds.js";
+export * from "./tickets.js";
+export * from "./chat.js";
+export * from "./rma.js";

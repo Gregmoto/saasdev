@@ -40,6 +40,10 @@ import paymentsModule from "./modules/payments/index.js";
 import taxModule from "./modules/tax/index.js";
 import shippingModule from "./modules/shipping/index.js";
 import fulfillmentModule from "./modules/fulfillments/index.js";
+import refundsModule from "./modules/refunds/index.js";
+import ticketsModule from "./modules/tickets/index.js";
+import chatModule from "./modules/chat/index.js";
+import rmaModule from "./modules/rma/index.js";
 
 export function buildApp() {
   const loggerOpts: FastifyServerOptions["logger"] =
@@ -96,6 +100,10 @@ export function buildApp() {
   app.register(taxModule);
   app.register(shippingModule);
   app.register(fulfillmentModule);
+  app.register(refundsModule);
+  app.register(ticketsModule);
+  app.register(chatModule);
+  app.register(rmaModule);
 
   app.setErrorHandler((error, _request, reply) => {
     if (error.name === "ZodError") {
