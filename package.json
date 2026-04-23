@@ -1,5 +1,5 @@
 {
-  "name": "saas-shop",
+  "name": "@saas-shop/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -12,7 +12,11 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "dev:admin": "pnpm --filter @saas-shop/admin dev",
+    "dev:storefront": "pnpm --filter @saas-shop/storefront dev",
+    "dev:marketing": "pnpm --filter @saas-shop/marketing dev",
+    "dev:all": "pnpm --parallel --filter './apps/*' dev"
   },
   "dependencies": {
     "@fastify/cookie": "^9.3.1",
