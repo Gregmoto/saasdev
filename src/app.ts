@@ -47,6 +47,7 @@ import rmaModule from "./modules/rma/index.js";
 import marketplaceModule from "./modules/marketplace/index.js";
 import affiliatesModule from "./modules/affiliates/index.js";
 import b2bModule from "./modules/b2b/index.js";
+import marketingCmsModule from "./modules/marketing-cms/index.js";
 
 export function buildApp() {
   const loggerOpts: FastifyServerOptions["logger"] =
@@ -110,6 +111,7 @@ export function buildApp() {
   app.register(marketplaceModule);
   app.register(affiliatesModule);
   app.register(b2bModule);
+  app.register(marketingCmsModule);
 
   app.setErrorHandler((error, _request, reply) => {
     if (error.name === "ZodError") {
