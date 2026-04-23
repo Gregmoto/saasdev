@@ -17,6 +17,8 @@ import impersonationModule from "./modules/impersonation/index.js";
 import platformAdminModule from "./modules/platform-admin/index.js";
 import onboardingModule from "./modules/onboarding/index.js";
 import domainsModule from "./modules/domains/index.js";
+import plansModule from "./modules/plans/index.js";
+import integrationsModule from "./modules/integrations/index.js";
 import { healthRoutes } from "./modules/health/routes.js";
 
 export function buildApp() {
@@ -47,6 +49,8 @@ export function buildApp() {
   app.register(twoFactorModule);
   app.register(impersonationModule);
   app.register(storeAccountsModule);
+  app.register(plansModule);
+  app.register(integrationsModule);
 
   app.setErrorHandler((error, _request, reply) => {
     if (error.name === "ZodError") {
