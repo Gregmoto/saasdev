@@ -19,6 +19,7 @@ import onboardingModule from "./modules/onboarding/index.js";
 import domainsModule from "./modules/domains/index.js";
 import plansModule from "./modules/plans/index.js";
 import integrationsModule from "./modules/integrations/index.js";
+import shopsModule from "./modules/shops/index.js";
 import productsModule from "./modules/products/index.js";
 import ordersModule from "./modules/orders/index.js";
 import customersModule from "./modules/customers/index.js";
@@ -61,6 +62,7 @@ export function buildApp() {
   app.register(domainsModule);
   app.register(plansModule);
   app.register(integrationsModule);
+  app.register(shopsModule);
   app.register(productsModule);
   app.register(ordersModule);
   app.register(customersModule);

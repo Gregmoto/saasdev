@@ -7,6 +7,7 @@ export * from "./security.js";
 export * from "./domains.js";
 export * from "./plans.js";
 export * from "./integrations.js";
+export * from "./shops.js";
 export * from "./products.js";
 export * from "./orders.js";
 export * from "./customers.js";

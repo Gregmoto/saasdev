@@ -1,4 +1,4 @@
-import type { AuthUser, StoreAccount, StoreMembership } from "../db/schema/index.js";
+import type { AuthUser, StoreAccount, StoreMembership, Shop } from "../db/schema/index.js";
 
 // Augment the Fastify.Session interface so direct session property access is typed.
 // @fastify/session exposes request.session as FastifySessionObject extends Fastify.Session,
@@ -33,6 +33,23 @@ declare module "fastify" {
     memberRole: StoreMembership["role"];
     /** True when the request is running inside an active impersonation session */
     isImpersonating: boolean;
+
+    // ── Multi-shop context ─────────────────────────────────────────────────────
+    /**
+     * The resolved shop for this request.
+     *
+     * Set by requireStoreAccountContext when:
+     *   a) The request hostname matches a shop_domain row, OR
+     *   b) The X-Shop-Id header contains a valid shop UUID owned by storeAccount.
+     *
+     * null means "All shops" / store-account-level view (admin mode).
+     */
+    currentShop: Shop | null;
+    /**
+     * Convenience shorthand: currentShop?.id ?? null.
+     * Routes can use this for shop-scoped queries without null-guarding.
+     */
+    currentShopId: string | null;
   }
 }
 
