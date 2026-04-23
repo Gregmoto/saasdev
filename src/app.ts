@@ -12,6 +12,8 @@ import authModule from "./modules/auth/index.js";
 import storeAccountsModule from "./modules/store-accounts/index.js";
 import portalModule from "./modules/portal/index.js";
 import invitesModule from "./modules/invites/index.js";
+import twoFactorModule from "./modules/two-factor/index.js";
+import impersonationModule from "./modules/impersonation/index.js";
 import { healthRoutes } from "./modules/health/routes.js";
 
 export function buildApp() {
@@ -39,6 +41,8 @@ export function buildApp() {
   app.register(authModule);
   app.register(portalModule);
   app.register(invitesModule);
+  app.register(twoFactorModule);
+  app.register(impersonationModule);
   app.register(storeAccountsModule);
 
   app.setErrorHandler((error, _request, reply) => {

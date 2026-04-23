@@ -1,4 +1,4 @@
-import { and, eq, gt, isNull } from "drizzle-orm";
+import { and, eq, gt, isNull, isNotNull } from "drizzle-orm";
 import type { Db } from "../../db/client.js";
 import {
   authUsers,
@@ -7,14 +7,10 @@ import {
   magicLinkTokens,
   storeAccounts,
   storeMemberships,
+  user2fa,
 } from "../../db/schema/index.js";
 import { hashPassword, verifyPassword } from "../../lib/password.js";
 import { generateSecureToken, sha256 } from "../../lib/token.js";
-import {
-  generateTotpSecret,
-  verifyTotpCode,
-  totpQrDataUrl,
-} from "../../lib/totp.js";
 import {
   sendEmail,
   passwordResetEmail,
@@ -71,14 +67,25 @@ export async function registerStoreAccount(
 // ---------------------------------------------------------------------------
 
 export type LoginResult =
-  | { outcome: "ok"; userId: string }
+  | { outcome: "ok"; userId: string; email: string }
   | { outcome: "totp_required"; userId: string }
-  | { outcome: "invalid_credentials" }
-  | { outcome: "account_inactive" };
+  | { outcome: "invalid_credentials"; userId?: string }
+  | { outcome: "account_inactive"; userId?: string };
 
+/**
+ * Verifies credentials and checks whether TOTP is required.
+ *
+ * TOTP verification is intentionally NOT done here — the route layer handles
+ * it via a second request to POST /auth/totp/verify.  This keeps the login
+ * endpoint focused on the password step and lets the 2FA step be audited
+ * independently.
+ *
+ * TOTP status is read from user_2fa (encrypted secret) rather than the
+ * legacy totpSecret column on auth_users.
+ */
 export async function login(
   db: Db,
-  opts: { email: string; password: string; totpCode: string | undefined },
+  opts: { email: string; password: string },
 ): Promise<LoginResult> {
   const [user] = await db
     .select()
@@ -87,16 +94,21 @@ export async function login(
     .limit(1);
 
   if (!user || !user.passwordHash) return { outcome: "invalid_credentials" };
-  if (!user.isActive) return { outcome: "account_inactive" };
+  if (!user.isActive) return { outcome: "account_inactive", userId: user.id };
 
   const passwordOk = await verifyPassword(user.passwordHash, opts.password);
-  if (!passwordOk) return { outcome: "invalid_credentials" };
+  if (!passwordOk) return { outcome: "invalid_credentials", userId: user.id };
 
-  if (user.totpEnabled) {
-    if (!opts.totpCode) return { outcome: "totp_required", userId: user.id };
-    if (!verifyTotpCode(user.totpSecret!, opts.totpCode)) {
-      return { outcome: "invalid_credentials" };
-    }
+  // Check user_2fa table (encrypted secret, replaces legacy authUsers.totpSecret).
+  const [tfaRow] = await db
+    .select({ id: user2fa.id })
+    .from(user2fa)
+    .where(and(eq(user2fa.userId, user.id), isNotNull(user2fa.enabledAt)))
+    .limit(1);
+
+  if (tfaRow) {
+    // Password OK, but TOTP step still needed.
+    return { outcome: "totp_required", userId: user.id };
   }
 
   await db
@@ -104,7 +116,7 @@ export async function login(
     .set({ lastLoginAt: new Date() })
     .where(eq(authUsers.id, user.id));
 
-  return { outcome: "ok", userId: user.id };
+  return { outcome: "ok", userId: user.id, email: user.email };
 }
 
 // ---------------------------------------------------------------------------
@@ -179,7 +191,7 @@ export async function requestPasswordReset(
 export async function confirmPasswordReset(
   db: Db,
   opts: { token: string; newPassword: string; storeAccountId: string },
-): Promise<boolean> {
+): Promise<{ ok: boolean; userId: string | null }> {
   const tokenHash = sha256(opts.token);
   const now = new Date();
 
@@ -196,7 +208,7 @@ export async function confirmPasswordReset(
     )
     .limit(1);
 
-  if (!record) return false;
+  if (!record) return { ok: false, userId: null };
 
   const passwordHash = await hashPassword(opts.newPassword);
 
@@ -212,7 +224,7 @@ export async function confirmPasswordReset(
       .where(eq(passwordResetTokens.id, record.id));
   });
 
-  return true;
+  return { ok: true, userId: record.userId };
 }
 
 // ---------------------------------------------------------------------------
@@ -288,71 +300,8 @@ export async function verifyMagicLink(
 }
 
 // ---------------------------------------------------------------------------
-// TOTP
+// Password change
 // ---------------------------------------------------------------------------
-
-export async function initTotpSetup(
-  db: Db,
-  userId: string,
-  email: string,
-): Promise<{ secret: string; qrDataUrl: string }> {
-  const secret = generateTotpSecret();
-
-  // Persist the secret before the user confirms — they must verify before it is enabled.
-  await db
-    .update(authUsers)
-    .set({ totpSecret: secret, updatedAt: new Date() })
-    .where(eq(authUsers.id, userId));
-
-  const qrDataUrl = await totpQrDataUrl(secret, email, "SaaS Shop");
-  return { secret, qrDataUrl };
-}
-
-export async function enableTotp(
-  db: Db,
-  userId: string,
-  code: string,
-): Promise<boolean> {
-  const [user] = await db
-    .select({ totpSecret: authUsers.totpSecret })
-    .from(authUsers)
-    .where(eq(authUsers.id, userId))
-    .limit(1);
-
-  if (!user?.totpSecret) return false;
-  if (!verifyTotpCode(user.totpSecret, code)) return false;
-
-  await db
-    .update(authUsers)
-    .set({ totpEnabled: true, updatedAt: new Date() })
-    .where(eq(authUsers.id, userId));
-
-  return true;
-}
-
-export async function disableTotp(
-  db: Db,
-  userId: string,
-  password: string,
-  code: string,
-): Promise<boolean> {
-  const [user] = await db
-    .select()
-    .from(authUsers)
-    .where(eq(authUsers.id, userId))
-    .limit(1);
-
-  if (!user?.passwordHash) return false;
-  if (!(await verifyPassword(user.passwordHash, password))) return false;
-  if (!user.totpSecret || !verifyTotpCode(user.totpSecret, code)) return false;
-
-  await db
-    .update(authUsers)
-    .set({ totpEnabled: false, totpSecret: null, updatedAt: new Date() })
-    .where(eq(authUsers.id, userId));
-
-  return true;
-}
 
 export async function changePassword(
   db: Db,

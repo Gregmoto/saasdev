@@ -2,14 +2,13 @@ import type { FastifyInstance } from "fastify";
 import { requireAuth } from "../../hooks/require-auth.js";
 import { resolveStoreAccountIdFromRequest } from "../../hooks/require-store-account.js";
 import * as AuthService from "./service.js";
+import * as SecurityService from "../security/service.js";
 import {
   loginSchema,
   registerSchema,
   passwordResetRequestSchema,
   passwordResetConfirmSchema,
   magicLinkRequestSchema,
-  totpEnableSchema,
-  totpDisableSchema,
   changePasswordSchema,
 } from "./schemas.js";
 import { config } from "../../config.js";
@@ -26,7 +25,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       );
 
       request.session.userId = userId;
-      request.session.totpVerified = true;
+      request.session.totpVerified = true; // no 2FA enrolled yet
       request.session.lastActiveStoreAccountId = storeAccountId;
 
       await AuthService.trackSession(app.db, {
@@ -52,22 +51,63 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     }
   });
 
-  // ── Login ────────────────────────────────────────────────────────────────
+  // ── Login ─────────────────────────────────────────────────────────────────
+  // Flow:
+  //  1. Brute-force lockout check (Redis)
+  //  2. Credential verification
+  //  3. On failure: record failed attempt → possible lockout → log security event
+  //  4. On success: clear failure counter
+  //  5. If TOTP enrolled: return { totpRequired: true }; set userId + totpVerified=false
+  //  6. If no TOTP: set totpVerified=true; check for suspicious IP; log success
   app.post(
     "/auth/login",
     { config: { rateLimit: { max: 10, timeWindow: "1 minute" } } },
     async (request, reply) => {
       const body = loginSchema.parse(request.body);
+      const ip = request.ip;
+      const userAgent = request.headers["user-agent"];
+
+      // ── 1. Lockout check ──────────────────────────────────────────────────
+      const locked = await SecurityService.isLockedOut(app.redis, body.email);
+      if (locked) {
+        await SecurityService.recordSecurityEvent(app.db, {
+          eventType: "login_lockout",
+          ipAddress: ip,
+          userAgent,
+          metadata: { email: body.email },
+        });
+        return reply.status(429).send({
+          statusCode: 429,
+          error: "Too Many Requests",
+          message:
+            "Account temporarily locked due to too many failed login attempts. Try again later.",
+        });
+      }
+
+      // ── 2. Credential check ───────────────────────────────────────────────
       const result = await AuthService.login(app.db, {
         email: body.email,
         password: body.password,
-        totpCode: body.totpCode,
       });
 
+      // ── 3. Failure path ───────────────────────────────────────────────────
       if (
         result.outcome === "invalid_credentials" ||
         result.outcome === "account_inactive"
       ) {
+        const { locked: nowLocked } = await SecurityService.recordFailedAttempt(
+          app.redis,
+          body.email,
+        );
+
+        await SecurityService.recordSecurityEvent(app.db, {
+          eventType: "login_fail",
+          userId: result.outcome === "account_inactive" ? result.userId : undefined,
+          ipAddress: ip,
+          userAgent,
+          metadata: { email: body.email, reason: result.outcome, lockedOut: nowLocked },
+        });
+
         return reply.status(401).send({
           statusCode: 401,
           error: "Unauthorized",
@@ -75,12 +115,62 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         });
       }
 
+      // ── 4. Clear failure counter on success ───────────────────────────────
+      await SecurityService.clearFailedAttempts(app.redis, body.email);
+
+      // ── 5. TOTP required ──────────────────────────────────────────────────
       if (result.outcome === "totp_required") {
+        // Save userId so /auth/totp/verify can load the user.
+        // totpVerified stays false — requireAuth blocks all /api/** until verified.
+        request.session.userId = result.userId;
+        request.session.totpVerified = false;
+
         return reply.status(200).send({ totpRequired: true });
       }
 
+      // ── 6. Fully authenticated ────────────────────────────────────────────
       request.session.userId = result.userId;
       request.session.totpVerified = true;
+
+      const storeAccountId = await resolveStoreAccountIdFromRequest(request);
+      if (storeAccountId) {
+        request.session.lastActiveStoreAccountId = storeAccountId;
+        await AuthService.trackSession(app.db, {
+          sessionId: request.session.sessionId,
+          userId: result.userId,
+          storeAccountId,
+          ipAddress: ip,
+          userAgent,
+          ttlSeconds: config.SESSION_TTL_SECONDS,
+        });
+      }
+
+      // Suspicious login detection (new IP for this user).
+      const suspicious = await SecurityService.checkSuspiciousLogin(
+        app.redis,
+        result.userId,
+        ip,
+      );
+      if (suspicious) {
+        await SecurityService.recordSecurityEvent(app.db, {
+          eventType: "suspicious_login",
+          userId: result.userId,
+          storeAccountId: storeAccountId ?? undefined,
+          ipAddress: ip,
+          userAgent,
+        });
+        if (result.email) {
+          await SecurityService.sendSuspiciousLoginAlert(result.email, ip);
+        }
+      }
+
+      await SecurityService.recordSecurityEvent(app.db, {
+        eventType: "login_success",
+        userId: result.userId,
+        storeAccountId: storeAccountId ?? undefined,
+        ipAddress: ip,
+        userAgent,
+      });
 
       return reply.status(200).send({ ok: true });
     },
@@ -92,8 +182,36 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     { preHandler: [requireAuth] },
     async (request, reply) => {
       await AuthService.revokeSession(app.db, request.session.sessionId);
+
+      await SecurityService.recordSecurityEvent(app.db, {
+        eventType: "session_revoked",
+        userId: request.currentUser.id,
+        ipAddress: request.ip,
+      });
+
       await request.session.destroy();
       return reply.status(204).send();
+    },
+  );
+
+  // ── Revoke all sessions ───────────────────────────────────────────────────
+  app.post(
+    "/auth/sessions/revoke-all",
+    { preHandler: [requireAuth] },
+    async (request, reply) => {
+      const userId = request.currentUser.id;
+      const count = await SecurityService.revokeAllSessions(app.redis, userId);
+
+      await SecurityService.recordSecurityEvent(app.db, {
+        eventType: "session_revoked_all",
+        userId,
+        ipAddress: request.ip,
+        metadata: { sessionsRevoked: count },
+      });
+
+      // Destroy the current session too.
+      await request.session.destroy();
+      return reply.send({ ok: true, sessionsRevoked: count });
     },
   );
 
@@ -109,6 +227,13 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         await AuthService.requestPasswordReset(app.db, {
           email: body.email,
           storeAccountId,
+        });
+
+        await SecurityService.recordSecurityEvent(app.db, {
+          eventType: "password_reset_request",
+          storeAccountId,
+          ipAddress: request.ip,
+          metadata: { email: body.email },
         });
       }
 
@@ -130,18 +255,30 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       });
     }
 
-    const ok = await AuthService.confirmPasswordReset(app.db, {
+    const result = await AuthService.confirmPasswordReset(app.db, {
       token: body.token,
       newPassword: body.newPassword,
       storeAccountId,
     });
 
-    if (!ok) {
+    if (!result.ok) {
       return reply.status(400).send({
         statusCode: 400,
         error: "Bad Request",
         message: "Invalid or expired token",
       });
+    }
+
+    await SecurityService.recordSecurityEvent(app.db, {
+      eventType: "password_reset_success",
+      userId: result.userId ?? undefined,
+      storeAccountId,
+      ipAddress: request.ip,
+    });
+
+    // Revoke all existing sessions after password reset.
+    if (result.userId) {
+      await SecurityService.revokeAllSessions(app.redis, result.userId);
     }
 
     return reply.status(200).send({ ok: true });
@@ -212,63 +349,17 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       ttlSeconds: config.SESSION_TTL_SECONDS,
     });
 
+    await SecurityService.recordSecurityEvent(app.db, {
+      eventType: "login_success",
+      userId: result.userId,
+      storeAccountId,
+      ipAddress: request.ip,
+      userAgent: request.headers["user-agent"],
+      metadata: { method: "magic_link" },
+    });
+
     return reply.status(200).send({ ok: true });
   });
-
-  // ── TOTP setup ────────────────────────────────────────────────────────────
-  app.post(
-    "/auth/totp/setup",
-    { preHandler: [requireAuth] },
-    async (request, reply) => {
-      const { secret, qrDataUrl } = await AuthService.initTotpSetup(
-        app.db,
-        request.currentUser.id,
-        request.currentUser.email,
-      );
-      return reply.send({ secret, qrDataUrl });
-    },
-  );
-
-  // ── TOTP enable ───────────────────────────────────────────────────────────
-  app.post(
-    "/auth/totp/enable",
-    { preHandler: [requireAuth] },
-    async (request, reply) => {
-      const { code } = totpEnableSchema.parse(request.body);
-      const ok = await AuthService.enableTotp(app.db, request.currentUser.id, code);
-      if (!ok) {
-        return reply.status(400).send({
-          statusCode: 400,
-          error: "Bad Request",
-          message: "Invalid TOTP code",
-        });
-      }
-      return reply.send({ ok: true });
-    },
-  );
-
-  // ── TOTP disable ──────────────────────────────────────────────────────────
-  app.post(
-    "/auth/totp/disable",
-    { preHandler: [requireAuth] },
-    async (request, reply) => {
-      const { password, code } = totpDisableSchema.parse(request.body);
-      const ok = await AuthService.disableTotp(
-        app.db,
-        request.currentUser.id,
-        password,
-        code,
-      );
-      if (!ok) {
-        return reply.status(400).send({
-          statusCode: 400,
-          error: "Bad Request",
-          message: "Invalid credentials or TOTP code",
-        });
-      }
-      return reply.send({ ok: true });
-    },
-  );
 
   // ── Change password ───────────────────────────────────────────────────────
   app.post(
@@ -289,6 +380,10 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
           message: "Current password incorrect",
         });
       }
+
+      // Revoke all other sessions after password change.
+      await SecurityService.revokeAllSessions(app.redis, request.currentUser.id);
+
       return reply.send({ ok: true });
     },
   );
@@ -296,6 +391,58 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
   // ── GET /auth/me ──────────────────────────────────────────────────────────
   app.get("/auth/me", { preHandler: [requireAuth] }, async (request, reply) => {
     const { id, email, totpEnabled, lastLoginAt } = request.currentUser;
-    return reply.send({ id, email, totpEnabled, lastLoginAt });
+    return reply.send({
+      id,
+      email,
+      totpEnabled,
+      lastLoginAt,
+      isImpersonating: request.isImpersonating,
+    });
   });
+
+  // ── GET /auth/invite/preview ──────────────────────────────────────────────
+  // Public — returns invite metadata for the accept form.
+  app.get("/auth/invite/preview", async (request, reply) => {
+    const token = (request.query as Record<string, string | undefined>)["token"];
+    if (!token) {
+      return reply.status(400).send({ statusCode: 400, error: "Bad Request", message: "Token required" });
+    }
+
+    const { getInvitePreview } = await import("../invites/service.js");
+    const preview = await getInvitePreview(app.db, token);
+
+    if (!preview) {
+      return reply.status(404).send({ statusCode: 404, error: "Not Found", message: "Invalid or expired invite" });
+    }
+
+    return reply.send(preview);
+  });
+
+  // ── POST /auth/invite/accept ──────────────────────────────────────────────
+  app.post(
+    "/auth/invite/accept",
+    { config: { rateLimit: { max: 10, timeWindow: "15 minutes" } } },
+    async (request, reply) => {
+      const { z } = await import("zod");
+      const body = z.object({ token: z.string().min(1), password: z.string().min(8) }).parse(request.body);
+
+      const { acceptInvite } = await import("../invites/service.js");
+      try {
+        const result = await acceptInvite(app.db, { rawToken: body.token, password: body.password });
+
+        request.session.userId = result.userId;
+        request.session.totpVerified = true;
+        request.session.lastActiveStoreAccountId = result.storeAccountId;
+
+        return reply.status(201).send({ userId: result.userId, role: result.role });
+      } catch (err: unknown) {
+        const e = err as { statusCode?: number; message?: string };
+        return reply.status(e.statusCode ?? 400).send({
+          statusCode: e.statusCode ?? 400,
+          error: "Bad Request",
+          message: e.message ?? "Invalid or expired invite token",
+        });
+      }
+    },
+  );
 }
