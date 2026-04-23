@@ -30,3 +30,5 @@ export * from "./chat.js";
 export * from "./rma.js";
 export * from "./marketplace.js";
 export * from "./affiliates.js";
+export * from "./b2b.js";
+export * from "./marketing-cms.js";
