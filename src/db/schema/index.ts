@@ -21,3 +21,6 @@ export * from "./suppliers.js";
 export * from "./import-center.js";
 export * from "./carts.js";
 export * from "./payments.js";
+export * from "./shipping.js";
+export * from "./tax.js";
+export * from "./fulfillments.js";
