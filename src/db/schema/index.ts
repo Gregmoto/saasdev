@@ -17,3 +17,4 @@ export * from "./content.js";
 export * from "./support.js";
 export * from "./reviews.js";
 export * from "./sync.js";
+export * from "./suppliers.js";

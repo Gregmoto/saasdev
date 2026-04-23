@@ -7,6 +7,7 @@ import redisPlugin from "./plugins/redis.js";
 import sessionPlugin from "./plugins/session.js";
 import rateLimitPlugin from "./plugins/rate-limit.js";
 import routeGuardPlugin from "./plugins/route-guard.js";
+import supplierQueuePlugin from "./plugins/supplier-queue.js";
 
 import authModule from "./modules/auth/index.js";
 import storeAccountsModule from "./modules/store-accounts/index.js";
@@ -29,6 +30,7 @@ import supportModule from "./modules/support/index.js";
 import reviewsModule from "./modules/reviews/index.js";
 import reportsModule from "./modules/reports/index.js";
 import bundlesModule from "./modules/bundles/index.js";
+import suppliersModule from "./modules/suppliers/index.js";
 import { healthRoutes } from "./modules/health/routes.js";
 
 export function buildApp() {
@@ -51,6 +53,8 @@ export function buildApp() {
   // routeGuardPlugin must be registered before any route modules so its
   // onRoute hook is active when those modules register their routes.
   app.register(routeGuardPlugin);
+  // supplierQueuePlugin depends on dbPlugin and redisPlugin; must come before route modules.
+  app.register(supplierQueuePlugin);
 
   app.register(healthRoutes);
   app.register(authModule);
@@ -74,6 +78,7 @@ export function buildApp() {
   app.register(reviewsModule);
   app.register(reportsModule);
   app.register(bundlesModule);
+  app.register(suppliersModule);
 
   app.setErrorHandler((error, _request, reply) => {
     if (error.name === "ZodError") {
