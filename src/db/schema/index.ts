@@ -28,3 +28,5 @@ export * from "./refunds.js";
 export * from "./tickets.js";
 export * from "./chat.js";
 export * from "./rma.js";
+export * from "./marketplace.js";
+export * from "./affiliates.js";
