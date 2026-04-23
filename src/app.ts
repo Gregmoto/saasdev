@@ -39,6 +39,7 @@ import { healthRoutes } from "./modules/health/routes.js";
 import paymentsModule from "./modules/payments/index.js";
 import taxModule from "./modules/tax/index.js";
 import shippingModule from "./modules/shipping/index.js";
+import fulfillmentModule from "./modules/fulfillments/index.js";
 
 export function buildApp() {
   const loggerOpts: FastifyServerOptions["logger"] =
@@ -94,6 +95,7 @@ export function buildApp() {
   app.register(paymentsModule);
   app.register(taxModule);
   app.register(shippingModule);
+  app.register(fulfillmentModule);
 
   app.setErrorHandler((error, _request, reply) => {
     if (error.name === "ZodError") {
