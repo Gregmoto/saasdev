@@ -19,6 +19,13 @@ import onboardingModule from "./modules/onboarding/index.js";
 import domainsModule from "./modules/domains/index.js";
 import plansModule from "./modules/plans/index.js";
 import integrationsModule from "./modules/integrations/index.js";
+import productsModule from "./modules/products/index.js";
+import ordersModule from "./modules/orders/index.js";
+import customersModule from "./modules/customers/index.js";
+import contentModule from "./modules/content/index.js";
+import supportModule from "./modules/support/index.js";
+import reviewsModule from "./modules/reviews/index.js";
+import reportsModule from "./modules/reports/index.js";
 import { healthRoutes } from "./modules/health/routes.js";
 
 export function buildApp() {
@@ -49,8 +56,18 @@ export function buildApp() {
   app.register(twoFactorModule);
   app.register(impersonationModule);
   app.register(storeAccountsModule);
+  app.register(platformAdminModule);
+  app.register(onboardingModule);
+  app.register(domainsModule);
   app.register(plansModule);
   app.register(integrationsModule);
+  app.register(productsModule);
+  app.register(ordersModule);
+  app.register(customersModule);
+  app.register(contentModule);
+  app.register(supportModule);
+  app.register(reviewsModule);
+  app.register(reportsModule);
 
   app.setErrorHandler((error, _request, reply) => {
     if (error.name === "ZodError") {
