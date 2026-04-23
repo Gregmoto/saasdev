@@ -37,6 +37,8 @@ import csvImportModule from "./modules/csv-import/index.js";
 import cartModule from "./modules/cart/index.js";
 import { healthRoutes } from "./modules/health/routes.js";
 import paymentsModule from "./modules/payments/index.js";
+import taxModule from "./modules/tax/index.js";
+import shippingModule from "./modules/shipping/index.js";
 
 export function buildApp() {
   const loggerOpts: FastifyServerOptions["logger"] =
@@ -90,6 +92,8 @@ export function buildApp() {
   app.register(csvImportModule);
   app.register(cartModule);
   app.register(paymentsModule);
+  app.register(taxModule);
+  app.register(shippingModule);
 
   app.setErrorHandler((error, _request, reply) => {
     if (error.name === "ZodError") {
