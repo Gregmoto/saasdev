@@ -28,6 +28,7 @@ import contentModule from "./modules/content/index.js";
 import supportModule from "./modules/support/index.js";
 import reviewsModule from "./modules/reviews/index.js";
 import reportsModule from "./modules/reports/index.js";
+import bundlesModule from "./modules/bundles/index.js";
 import { healthRoutes } from "./modules/health/routes.js";
 
 export function buildApp() {
@@ -72,6 +73,7 @@ export function buildApp() {
   app.register(supportModule);
   app.register(reviewsModule);
   app.register(reportsModule);
+  app.register(bundlesModule);
 
   app.setErrorHandler((error, _request, reply) => {
     if (error.name === "ZodError") {
