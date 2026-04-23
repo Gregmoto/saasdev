@@ -44,6 +44,7 @@ import refundsModule from "./modules/refunds/index.js";
 import ticketsModule from "./modules/tickets/index.js";
 import chatModule from "./modules/chat/index.js";
 import rmaModule from "./modules/rma/index.js";
+import marketplaceModule from "./modules/marketplace/index.js";
 
 export function buildApp() {
   const loggerOpts: FastifyServerOptions["logger"] =
@@ -104,6 +105,7 @@ export function buildApp() {
   app.register(ticketsModule);
   app.register(chatModule);
   app.register(rmaModule);
+  app.register(marketplaceModule);
 
   app.setErrorHandler((error, _request, reply) => {
     if (error.name === "ZodError") {
