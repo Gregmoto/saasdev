@@ -1,5 +1,10 @@
-# Railway Railpack config — Fastify API
-# Use tsx to run TypeScript directly (avoids dist layer issue)
+# Universal Railway Railpack config for all services in the monorepo.
+# Each service sets BUILD_FILTER and START_CMD as environment variables.
+#
+# API:         BUILD_FILTER=@saas-shop/api   START_CMD="node --import tsx/esm src/server.ts"
+# Admin:       BUILD_FILTER=@saas-shop/admin  START_CMD="node apps/admin/.next/standalone/apps/admin/server.js"
+# Marketing:   BUILD_FILTER=@saas-shop/marketing START_CMD="node apps/marketing/.next/standalone/apps/marketing/server.js"
+# Storefront:  BUILD_FILTER=@saas-shop/storefront START_CMD="node apps/storefront/.next/standalone/apps/storefront/server.js"
 
 [phases.install]
 cmds = []
@@ -7,11 +12,13 @@ cmds = []
 [phases.build]
 cmds = [
   "npm install -g pnpm@9",
-  "pnpm install --frozen-lockfile"
+  "pnpm install --frozen-lockfile",
+  "if [ -n \"$BUILD_FILTER\" ]; then pnpm --filter \"$BUILD_FILTER\" build; fi"
 ]
 
 [start]
-cmd = "node --import tsx/esm src/server.ts"
+cmd = "sh -c \"$START_CMD\""
 
 [variables]
 NODE_ENV = "production"
+NEXT_TELEMETRY_DISABLED = "1"

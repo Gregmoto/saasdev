@@ -2,7 +2,6 @@
 builder = "nixpacks"
 
 [deploy]
-healthcheckPath = "/health"
-healthcheckTimeout = 30
+# No healthcheckPath = Railway uses TCP port check (works for all services)
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
