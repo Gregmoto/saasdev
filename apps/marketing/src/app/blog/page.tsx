@@ -59,6 +59,8 @@ async function fetchPosts(): Promise<BlogPost[]> {
       { next: { revalidate: 3600 } }
     );
     if (!res.ok) return FALLBACK_POSTS;
+    
+    if (!(res.headers.get("content-type") ?? "").includes("application/json")) return FALLBACK_POSTS;
     const data = await res.json();
     const raw: BlogPost[] = Array.isArray(data) ? data : (data?.data ?? []);
     return raw.length > 0 ? raw : FALLBACK_POSTS;

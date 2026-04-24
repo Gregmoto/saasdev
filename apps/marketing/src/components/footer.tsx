@@ -3,15 +3,36 @@ import Link from "next/link";
 const COLS = [
   {
     title: "Produkt",
-    links: [["Funktioner", "/features"], ["Priser", "/pricing"], ["Versionshistorik", "/changelog"], ["Färdplan", "/roadmap"]],
+    links: [
+      ["Funktioner", "/features"],
+      ["Integrationer", "/integrations"],
+      ["Priser", "/pricing"],
+      ["Versionshistorik", "/changelog"],
+      ["Färdplan", "/roadmap"],
+    ],
   },
   {
     title: "Resurser",
-    links: [["Dokumentation", "/docs"], ["Blogg", "/blog"], ["Kundcase", "/cases"], ["Integrationer", "/integrations"]],
+    links: [
+      ["Dokumentation", "/docs"],
+      ["Nyheter", "/news"],
+      ["Blogg", "/blog"],
+      ["Kundcase", "/cases"],
+      ["RSS — Nyheter", "/news/rss"],
+      ["RSS — Changelog", "/changelog/rss"],
+    ],
   },
   {
     title: "Företag",
-    links: [["Om oss", "/about"], ["Kontakt", "/contact"], ["Integritetspolicy", "/privacy"], ["Villkor", "/terms"]],
+    links: [
+      ["Om oss", "/about"],
+      ["Kontakt", "/contact"],
+      ["Alternativ till Shopify", "/alternatives/shopify"],
+      ["Alternativ till WooCommerce", "/alternatives/woocommerce"],
+      ["Alternativ till PrestaShop", "/alternatives/prestashop"],
+      ["Integritetspolicy", "/privacy"],
+      ["Villkor", "/terms"],
+    ],
   },
 ];
 

@@ -69,7 +69,8 @@ async function fetchEntry(slug: string): Promise<ChangelogEntry | null> {
     const res = await fetch(`${API}/api/cms/changelog/${slug}?lang=sv`, {
       next: { revalidate: 3600 },
     });
-    if (!res.ok) return null;
+    const _ct = res.headers.get("content-type") ?? "";
+    if (!res.ok || !_ct.includes("application/json")) return null;
     const data = await res.json();
     return data?.data ?? data ?? null;
   } catch {

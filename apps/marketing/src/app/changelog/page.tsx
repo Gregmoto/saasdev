@@ -63,7 +63,9 @@ async function fetchChangelog(): Promise<ChangelogEntry[]> {
       next: { revalidate: 3600 },
     });
     if (!res.ok) return FALLBACK_CHANGES;
-    const data = await res.json();
+    
+if (!(res.headers.get("content-type") ?? "").includes("application/json")) return FALLBACK_CHANGES;
+const data = await res.json();
     const entries: ChangelogEntry[] = Array.isArray(data)
       ? data
       : (data?.data ?? []);

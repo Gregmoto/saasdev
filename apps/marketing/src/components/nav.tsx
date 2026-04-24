@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation";
 
 const LINKS = [
   { label: "Funktioner", href: "/features" },
+  { label: "Integrationer", href: "/integrations" },
   { label: "Priser", href: "/pricing" },
+  { label: "Nyheter", href: "/news" },
   { label: "Blogg", href: "/blog" },
   { label: "Demo", href: "/demo" },
 ];
@@ -47,7 +49,7 @@ export function Nav() {
         {/* CTA */}
         <div className="hidden md:flex items-center gap-3">
           <Link
-            href="http://localhost:3001/login"
+            href="https://admin-production-42ec.up.railway.app/login"
             className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors px-3 py-1.5"
           >
             Logga in
@@ -87,7 +89,7 @@ export function Nav() {
             </Link>
           ))}
           <div className="pt-3 mt-3 border-t border-zinc-100 flex flex-col gap-2">
-            <Link href="http://localhost:3001/login" className="text-sm text-zinc-500 px-3 py-2">Logga in</Link>
+            <Link href="https://admin-production-42ec.up.railway.app/login" className="text-sm text-zinc-500 px-3 py-2">Logga in</Link>
             <Link href="/contact" className="text-sm font-medium bg-zinc-900 text-white px-4 py-2 rounded-lg text-center">Kom igång</Link>
           </div>
         </div>

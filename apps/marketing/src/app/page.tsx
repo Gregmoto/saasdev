@@ -175,6 +175,7 @@ async function fetchPosts(): Promise<typeof FALLBACK_POSTS> {
       next: { revalidate: 3600 },
     });
     if (!res.ok) return FALLBACK_POSTS;
+    if (!(res.headers.get("content-type") ?? "").includes("application/json")) return FALLBACK_POSTS;
     const data: CmsPost[] = await res.json();
     if (!Array.isArray(data) || data.length === 0) return FALLBACK_POSTS;
     return data.map((p, i) => ({
@@ -198,6 +199,7 @@ async function fetchFaqs(): Promise<{ question: string; answer: string }[]> {
       next: { revalidate: 3600 },
     });
     if (!res.ok) return FALLBACK_FAQS;
+    if (!(res.headers.get("content-type") ?? "").includes("application/json")) return FALLBACK_FAQS;
     const data: CmsFaq[] = await res.json();
     if (!Array.isArray(data) || data.length === 0) return FALLBACK_FAQS;
     return data;

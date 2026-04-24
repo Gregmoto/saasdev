@@ -106,6 +106,8 @@ async function fetchFeature(slug: string): Promise<CmsFeature | null> {
       next: { revalidate: 3600 },
     });
     if (!res.ok) return null;
+    const ct = res.headers.get("content-type") ?? "";
+    if (!ct.includes("application/json")) return null;
     return res.json() as Promise<CmsFeature>;
   } catch {
     return null;
@@ -129,7 +131,7 @@ export async function generateStaticParams() {
     const res = await fetch(`${API}/api/cms/features?lang=sv&limit=100`, {
       cache: "no-store",
     });
-    if (res.ok) {
+    if (res.ok && (res.headers.get("content-type") ?? "").includes("application/json")) {
       const data = (await res.json()) as { items: CmsFeature[] };
       return (data.items ?? []).map((f) => ({ slug: f.slug }));
     }

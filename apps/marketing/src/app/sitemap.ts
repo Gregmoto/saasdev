@@ -22,7 +22,9 @@ async function fetchSlugs(endpoint: string): Promise<CmsEntry[]> {
   try {
     const res = await fetch(`${API}${endpoint}`, { cache: "no-store" });
     if (!res.ok) return [];
-    const data = await res.json();
+    
+if (!(res.headers.get("content-type") ?? "").includes("application/json")) return [];
+const data = await res.json();
     // Support both { data: [] } and plain [] shapes
     return Array.isArray(data) ? data : (data?.data ?? []);
   } catch {
@@ -88,15 +90,40 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as ChangeFrequency,
       priority: 0.8,
     },
+    {
+      url: `${SITE_URL}/news`,
+      lastModified: now,
+      changeFrequency: "weekly" as ChangeFrequency,
+      priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/alternatives/shopify`,
+      lastModified: now,
+      changeFrequency: "monthly" as ChangeFrequency,
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/alternatives/woocommerce`,
+      lastModified: now,
+      changeFrequency: "monthly" as ChangeFrequency,
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/alternatives/prestashop`,
+      lastModified: now,
+      changeFrequency: "monthly" as ChangeFrequency,
+      priority: 0.8,
+    },
   ];
 
-  const [blogPosts, changelogEntries, featurePages, caseStudies, integrations] =
+  const [blogPosts, changelogEntries, featurePages, caseStudies, integrations, newsPosts] =
     await Promise.all([
       fetchSlugs("/api/cms/posts?type=blog&lang=sv&limit=100"),
       fetchSlugs("/api/cms/changelog?lang=sv&limit=100"),
       fetchSlugs("/api/cms/features?lang=sv&limit=100"),
       fetchSlugs("/api/cms/cases?lang=sv&limit=100"),
       fetchSlugs("/api/cms/integrations?lang=sv&limit=100"),
+      fetchSlugs("/api/cms/posts?type=news&lang=sv&limit=100"),
     ]);
 
   const dynamicBlogPages: MetadataRoute.Sitemap = blogPosts.map((post) => ({
@@ -138,6 +165,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
   );
 
+  const dynamicNewsPages: MetadataRoute.Sitemap = newsPosts.map((post) => ({
+    url: `${SITE_URL}/news/${post.slug}`,
+    lastModified: post.updatedAt ? new Date(post.updatedAt) : now,
+    changeFrequency: "monthly" as ChangeFrequency,
+    priority: 0.7,
+  }));
+
   return [
     ...staticPages,
     ...dynamicBlogPages,
@@ -145,5 +179,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...dynamicFeaturePages,
     ...dynamicCasePages,
     ...dynamicIntegrationPages,
+    ...dynamicNewsPages,
   ];
 }

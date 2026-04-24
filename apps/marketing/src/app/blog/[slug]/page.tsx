@@ -162,7 +162,8 @@ async function fetchCmsPost(slug: string): Promise<CmsPost | null> {
     const res = await fetch(`${API}/api/cms/posts/${slug}?lang=sv`, {
       next: { revalidate: 3600 },
     });
-    if (!res.ok) return null;
+    const _ct = res.headers.get("content-type") ?? "";
+    if (!res.ok || !_ct.includes("application/json")) return null;
     const data = await res.json();
     return data?.data ?? data ?? null;
   } catch {
