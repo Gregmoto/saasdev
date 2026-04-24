@@ -15,6 +15,7 @@ const NAV = [
   { label: "Support", href: "/support", icon: "🎫" },
   { label: "Reviews", href: "/reviews", icon: "⭐" },
   { label: "FAQ", href: "/faq", icon: "❓" },
+  { label: "Demo QA", href: "/demo-qa", icon: "✅" },
   { label: "Settings", href: "/settings", icon: "⚙️" },
 ];
 

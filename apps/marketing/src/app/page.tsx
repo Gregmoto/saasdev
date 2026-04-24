@@ -213,58 +213,53 @@ export default async function HomePage() {
   return (
     <>
       <Nav />
-      <main>
+      <main className="bg-stone-50">
 
         {/* ── Section 1: Hero ───────────────────────────────── */}
-        <section className="relative overflow-hidden">
-          <div className="absolute inset-0 -z-10">
-            <div className="absolute top-[-80px] left-1/2 -translate-x-1/2 w-[900px] h-[700px] rounded-full bg-blue-100 opacity-40 blur-3xl" />
-            <div className="absolute top-[200px] left-1/4 w-[400px] h-[400px] rounded-full bg-blue-50 opacity-50 blur-3xl" />
-          </div>
-
+        <section className="bg-white">
           <div className="max-w-5xl mx-auto px-6 pt-28 pb-20 text-center">
-            <div className="inline-flex items-center gap-2 border border-blue-100 bg-blue-50 text-blue-700 text-xs font-medium px-3.5 py-1.5 rounded-full mb-8 shadow-sm">
+            <div className="inline-flex items-center gap-2 border border-stone-200 bg-stone-100 text-stone-700 text-xs font-medium px-3.5 py-1.5 rounded-full mb-8">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse flex-shrink-0" />
               Nu med AI-driven konflikthantering vid import
             </div>
 
-            <h1 className="text-5xl md:text-[4.5rem] font-bold text-zinc-950 leading-[1.08] tracking-tight mb-6">
+            <h1 className="text-5xl md:text-6xl font-bold text-stone-900 leading-[1.1] tracking-tight mb-6">
               E-handelsinfrastruktur<br />
-              <span className="text-blue-600">byggd för att växa</span>
+              byggd för att växa
             </h1>
 
-            <p className="text-lg md:text-xl text-zinc-500 max-w-2xl mx-auto leading-relaxed mb-10">
+            <p className="text-lg text-stone-500 max-w-xl mx-auto leading-relaxed mb-10">
               Den samlade plattformen för moderna handlare — webshop, multishop, marketplace och B2B i en enda dashboard.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 href="/contact"
-                className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-7 py-3.5 rounded-xl transition-all duration-200 text-sm shadow-lg shadow-blue-200"
+                className="inline-flex items-center justify-center gap-2 bg-stone-900 hover:bg-stone-800 text-white font-semibold px-7 py-3.5 rounded-xl transition-colors text-sm"
               >
                 Kom igång gratis
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </Link>
               <Link
                 href="/demo"
-                className="inline-flex items-center justify-center gap-2 bg-white hover:bg-zinc-50 text-zinc-700 font-medium px-7 py-3.5 rounded-xl border border-zinc-200 transition-all duration-200 text-sm shadow-sm"
+                className="inline-flex items-center justify-center gap-2 text-stone-600 font-medium px-7 py-3.5 rounded-xl border border-stone-200 hover:border-stone-300 transition-colors text-sm"
               >
                 Se demo
               </Link>
             </div>
 
-            {/* Mock dashboard with sidebar */}
+            {/* Mock dashboard */}
             <div className="mt-16 mx-auto max-w-4xl">
-              <div className="bg-white rounded-2xl border border-zinc-200 shadow-2xl shadow-zinc-200/60 overflow-hidden">
-                <div className="flex items-center gap-2 px-4 py-3 bg-zinc-50 border-b border-zinc-200">
+              <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-3 bg-stone-50 border-b border-stone-200">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
                   <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
                   <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
-                  <div className="mx-auto text-xs text-zinc-400 font-mono">admin.shopman.dev/dashboard</div>
+                  <div className="mx-auto text-xs text-stone-400 font-mono">admin.shopman.dev/dashboard</div>
                 </div>
-                <div className="flex bg-zinc-50 min-h-[300px]">
+                <div className="flex bg-stone-50 min-h-[300px]">
                   {/* Sidebar */}
-                  <div className="w-40 flex-shrink-0 border-r border-zinc-200 bg-white p-4 space-y-1 hidden sm:block">
+                  <div className="w-40 flex-shrink-0 border-r border-stone-200 bg-white p-4 space-y-1 hidden sm:block">
                     {[
                       { label: "Översikt", active: true },
                       { label: "Ordrar", active: false },
@@ -276,16 +271,16 @@ export default async function HomePage() {
                       <div
                         key={item.label}
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
-                          item.active ? "bg-blue-50 text-blue-700" : "text-zinc-400"
+                          item.active ? "bg-blue-50 text-blue-700" : "text-stone-400"
                         }`}
                       >
                         {item.label}
                       </div>
                     ))}
-                    <div className="pt-4 mt-4 border-t border-zinc-100">
-                      <div className="px-3 py-1 text-[10px] text-zinc-300 font-medium uppercase tracking-wider mb-1">Butiker</div>
+                    <div className="pt-4 mt-4 border-t border-stone-100">
+                      <div className="px-3 py-1 text-[10px] text-stone-300 font-medium uppercase tracking-wider mb-1">Butiker</div>
                       {["NordShop", "Acme AB", "Fjord Retail"].map((s) => (
-                        <div key={s} className="px-3 py-1 text-xs text-zinc-400">{s}</div>
+                        <div key={s} className="px-3 py-1 text-xs text-stone-400">{s}</div>
                       ))}
                     </div>
                   </div>
@@ -293,31 +288,31 @@ export default async function HomePage() {
                   <div className="flex-1 p-5">
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                       {(["Ordrar", "Intäkter", "Kunder", "Produkter"] as const).map((label, i) => (
-                        <div key={label} className="bg-white rounded-xl border border-zinc-100 p-3.5 shadow-sm">
-                          <div className="text-xs text-zinc-400 mb-1.5">{label}</div>
-                          <div className="text-lg font-bold text-zinc-900">{["142", "48 200 kr", "891", "1 204"][i]}</div>
+                        <div key={label} className="bg-white rounded-xl border border-stone-100 p-3.5 shadow-sm">
+                          <div className="text-xs text-stone-400 mb-1.5">{label}</div>
+                          <div className="text-lg font-bold text-stone-900">{["142", "48 200 kr", "891", "1 204"][i]}</div>
                           <div className="text-xs text-green-600 mt-0.5">↑ {["12%", "8%", "23%", "4%"][i]}</div>
                         </div>
                       ))}
                     </div>
                     <div className="grid grid-cols-3 gap-3">
-                      <div className="col-span-2 bg-white rounded-xl border border-zinc-100 p-4 shadow-sm h-28 flex flex-col justify-between">
-                        <div className="text-xs text-zinc-400 mb-2">Orderöversikt — senaste 30 dagarna</div>
+                      <div className="col-span-2 bg-white rounded-xl border border-stone-100 p-4 shadow-sm h-28 flex flex-col justify-between">
+                        <div className="text-xs text-stone-400 mb-2">Orderöversikt — senaste 30 dagarna</div>
                         <div className="flex items-end gap-1 h-14">
                           {[40, 55, 35, 70, 60, 80, 65, 90, 75, 100, 85, 95].map((h, i) => (
                             <div key={i} className="flex-1 bg-blue-100 rounded-t" style={{ height: `${h}%` }} />
                           ))}
                         </div>
                       </div>
-                      <div className="bg-white rounded-xl border border-zinc-100 p-3.5 shadow-sm h-28">
-                        <div className="text-xs text-zinc-400 mb-2">Senaste ordrar</div>
-                        {[["#1042", "Betald", "green"], ["#1041", "Packad", "blue"], ["#1040", "Levererad", "zinc"]].map(([n, status, color]) => (
+                      <div className="bg-white rounded-xl border border-stone-100 p-3.5 shadow-sm h-28">
+                        <div className="text-xs text-stone-400 mb-2">Senaste ordrar</div>
+                        {[["#1042", "Betald", "green"], ["#1041", "Packad", "blue"], ["#1040", "Levererad", "stone"]].map(([n, status, color]) => (
                           <div key={n} className="flex justify-between items-center py-0.5">
-                            <span className="text-[10px] font-mono text-zinc-600">{n}</span>
+                            <span className="text-[10px] font-mono text-stone-600">{n}</span>
                             <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
                               color === "green" ? "text-green-600 bg-green-50" :
                               color === "blue" ? "text-blue-600 bg-blue-50" :
-                              "text-zinc-500 bg-zinc-100"
+                              "text-stone-500 bg-stone-100"
                             }`}>{status}</span>
                           </div>
                         ))}
@@ -328,19 +323,20 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
+          <div className="border-b border-stone-100" />
         </section>
 
         {/* ── Section 2: Social proof ───────────────────────── */}
-        <section className="py-14 border-y border-zinc-100">
+        <section className="bg-stone-50 border-y border-stone-100 py-14">
           <div className="max-w-7xl mx-auto px-6">
-            <p className="text-center text-xs text-zinc-400 uppercase tracking-widest mb-8 font-medium">
+            <p className="text-center text-xs text-stone-400 uppercase tracking-widest mb-8 font-medium">
               Används av handlare i hela Skandinavien
             </p>
             <div className="flex items-center justify-center gap-3 flex-wrap">
               {BRANDS.map((name) => (
                 <span
                   key={name}
-                  className="text-xs font-semibold text-zinc-300 tracking-wide border border-zinc-100 px-4 py-2 rounded-full"
+                  className="text-xs font-semibold text-stone-400 tracking-wide border border-stone-200 px-4 py-2 rounded-full"
                 >
                   {name}
                 </span>
@@ -350,52 +346,56 @@ export default async function HomePage() {
         </section>
 
         {/* ── Section 3: Features grid ──────────────────────── */}
-        <section className="max-w-7xl mx-auto px-6 py-28">
-          <div className="text-center max-w-2xl mx-auto mb-20">
-            <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">Plattform</div>
-            <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 tracking-tight mb-4">
-              Allt du behöver för att driva din butik
-            </h2>
-            <p className="text-zinc-500 leading-relaxed">
-              Verktyg byggda för e-handel som samverkar sömlöst, så att du kan fokusera på att växa.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {FEATURES.map((f) => (
-              <div
-                key={f.title}
-                className="group bg-white rounded-2xl border border-zinc-100 p-7 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
-              >
-                <div className="w-10 h-10 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center mb-5 text-zinc-600 group-hover:bg-blue-50 group-hover:border-blue-100 group-hover:text-blue-600 transition-colors">
-                  {f.icon}
+        <section className="bg-white">
+          <div className="max-w-7xl mx-auto px-6 py-28">
+            <div className="text-center max-w-2xl mx-auto mb-20">
+              <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">Plattform</div>
+              <h2 className="text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-4">
+                Allt du behöver för att driva din butik
+              </h2>
+              <p className="text-stone-500 leading-relaxed">
+                Verktyg byggda för e-handel som samverkar sömlöst, så att du kan fokusera på att växa.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {FEATURES.map((f) => (
+                <div
+                  key={f.title}
+                  className="group bg-stone-50 rounded-2xl p-6 border border-stone-100 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-white border border-stone-200 flex items-center justify-center mb-5 text-blue-600 group-hover:border-blue-100 transition-colors">
+                    {f.icon}
+                  </div>
+                  <h3 className="font-semibold text-stone-900 mb-2">{f.title}</h3>
+                  <p className="text-sm text-stone-500 leading-relaxed">{f.desc}</p>
                 </div>
-                <h3 className="font-semibold text-zinc-900 mb-2">{f.title}</h3>
-                <p className="text-sm text-zinc-500 leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </section>
 
         {/* ── Section 4: Mode cards ─────────────────────────── */}
-        <section className="max-w-7xl mx-auto px-6 py-20">
-          <div className="text-center mb-12">
-            <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">Flexibilitet</div>
-            <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 tracking-tight">
-              En plattform, fyra sätt att växa
-            </h2>
+        <section className="bg-stone-50">
+          <div className="max-w-7xl mx-auto px-6 py-24">
+            <div className="text-center mb-12">
+              <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">Flexibilitet</div>
+              <h2 className="text-3xl md:text-4xl font-bold text-stone-900 tracking-tight">
+                En plattform, fyra sätt att växa
+              </h2>
+            </div>
+            <ModeTabs />
           </div>
-          <ModeTabs />
         </section>
 
         {/* ── Section 5: MultiShop highlight ───────────────── */}
-        <section className="bg-zinc-950 py-28">
+        <section className="bg-stone-900 py-28">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
               <div className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-3">MultiShop</div>
               <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
                 Alla dina butiker på ett ställe
               </h2>
-              <p className="text-zinc-400 mt-4 max-w-xl mx-auto">
+              <p className="text-stone-400 mt-4 max-w-xl mx-auto leading-relaxed">
                 Växla mellan butiker utan att logga ut. Dela lager, kunder och kampanjer — eller håll allt isolerat.
               </p>
             </div>
@@ -407,9 +407,9 @@ export default async function HomePage() {
                   { label: "Ordrar/mån", value: "500K+" },
                   { label: "Lager", value: "Globalt" },
                 ].map((stat) => (
-                  <div key={stat.label} className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6">
+                  <div key={stat.label} className="bg-stone-800 rounded-2xl border border-stone-700 p-6">
                     <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
-                    <div className="text-sm text-zinc-500">{stat.label}</div>
+                    <div className="text-sm text-stone-400">{stat.label}</div>
                   </div>
                 ))}
               </div>
@@ -428,7 +428,7 @@ export default async function HomePage() {
                         <path d="M2 5l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
-                    <span className="text-zinc-300 text-sm leading-relaxed">{b}</span>
+                    <span className="text-stone-300 text-sm leading-relaxed">{b}</span>
                   </div>
                 ))}
                 <div className="pt-4">
@@ -442,14 +442,14 @@ export default async function HomePage() {
         </section>
 
         {/* ── Section 6: SEO & Speed ────────────────────────── */}
-        <section className="bg-blue-50 py-28">
+        <section className="bg-white py-28">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
               <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">SEO & Hastighet</div>
-              <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 tracking-tight">
+              <h2 className="text-3xl md:text-4xl font-bold text-stone-900 tracking-tight">
                 Bygg för sökmotorer och hastighet
               </h2>
-              <p className="text-zinc-500 mt-4 max-w-xl mx-auto">
+              <p className="text-stone-500 mt-4 max-w-xl mx-auto leading-relaxed">
                 ShopMan genererar teknisk SEO-data automatiskt — du fokuserar på innehållet.
               </p>
             </div>
@@ -483,10 +483,10 @@ export default async function HomePage() {
                   ),
                 },
               ].map((item) => (
-                <div key={item.title} className="bg-white rounded-2xl p-8 border border-blue-100 shadow-sm">
+                <div key={item.title} className="bg-white rounded-2xl p-8 border border-stone-200 shadow-sm">
                   <div className="mb-5">{item.icon}</div>
-                  <h3 className="font-semibold text-zinc-900 mb-3">{item.title}</h3>
-                  <p className="text-sm text-zinc-500 leading-relaxed">{item.desc}</p>
+                  <h3 className="font-semibold text-stone-900 mb-3">{item.title}</h3>
+                  <p className="text-sm text-stone-500 leading-relaxed">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -494,76 +494,78 @@ export default async function HomePage() {
         </section>
 
         {/* ── Section 7: Integrations ───────────────────────── */}
-        <section className="max-w-7xl mx-auto px-6 py-28">
-          <div className="text-center mb-16">
-            <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">Integrationer</div>
-            <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 tracking-tight">
-              Koppla ihop hela din stack
-            </h2>
-            <p className="text-zinc-500 mt-4 max-w-xl mx-auto">
-              Färdiga kopplingar till de verktyg du redan använder. Eller bygg din egen via API.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-10">
-            {INTEGRATIONS.map((name) => (
-              <div key={name} className="bg-white rounded-xl border border-zinc-100 p-5 shadow-sm flex flex-col items-center gap-3 hover:border-zinc-200 hover:shadow-md transition-all duration-200">
-                <div className="w-10 h-10 rounded-lg bg-zinc-50 flex items-center justify-center text-zinc-300">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <rect x="2" y="2" width="12" height="12" rx="2"/>
-                  </svg>
+        <section className="bg-stone-50 py-28">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center mb-16">
+              <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">Integrationer</div>
+              <h2 className="text-3xl md:text-4xl font-bold text-stone-900 tracking-tight">
+                Koppla ihop hela din stack
+              </h2>
+              <p className="text-stone-500 mt-4 max-w-xl mx-auto leading-relaxed">
+                Färdiga kopplingar till de verktyg du redan använder. Eller bygg din egen via API.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-10">
+              {INTEGRATIONS.map((name) => (
+                <div key={name} className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm flex flex-col items-center gap-3 hover:shadow-md transition-all duration-200">
+                  <div className="w-10 h-10 rounded-lg bg-stone-50 flex items-center justify-center text-stone-300">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <rect x="2" y="2" width="12" height="12" rx="2"/>
+                    </svg>
+                  </div>
+                  <span className="text-xs font-semibold text-stone-600 text-center">{name}</span>
                 </div>
-                <span className="text-xs font-semibold text-zinc-600 text-center">{name}</span>
-              </div>
-            ))}
-          </div>
-          <div className="text-center">
-            <Link href="/integrations" className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
-              Se alla integrationer →
-            </Link>
+              ))}
+            </div>
+            <div className="text-center">
+              <Link href="/integrations" className="text-sm text-blue-700 hover:text-blue-800 font-medium transition-colors">
+                Se alla integrationer →
+              </Link>
+            </div>
           </div>
         </section>
 
         {/* ── Section 8: Pricing teaser ─────────────────────── */}
-        <section className="bg-zinc-50 py-28">
+        <section className="bg-white py-28">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
               <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">Priser</div>
-              <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 tracking-tight">
+              <h2 className="text-3xl md:text-4xl font-bold text-stone-900 tracking-tight">
                 Transparenta priser för alla storlekar
               </h2>
-              <p className="text-zinc-500 mt-4">14 dagars gratis provperiod. Inget kreditkort krävs.</p>
+              <p className="text-stone-500 mt-4">14 dagars gratis provperiod. Inget kreditkort krävs.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               {PLANS.map((plan) => (
                 <div
                   key={plan.name}
-                  className={`rounded-2xl p-7 border transition-all ${
+                  className={`rounded-2xl p-7 border transition-all shadow-sm ${
                     plan.highlight
-                      ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-200"
-                      : "bg-white border-zinc-200"
+                      ? "ring-2 ring-blue-600 bg-blue-50 border-blue-200"
+                      : "bg-white border-stone-200"
                   }`}
                 >
-                  <div className={`text-xs font-semibold uppercase tracking-wider mb-2 ${plan.highlight ? "text-blue-200" : "text-blue-600"}`}>
+                  <div className={`text-xs font-semibold uppercase tracking-wider mb-2 ${plan.highlight ? "text-blue-600" : "text-blue-600"}`}>
                     {plan.name}
                   </div>
                   <div className="flex items-baseline gap-1 mb-1">
-                    <span className="text-3xl font-bold">{plan.price}</span>
+                    <span className="text-3xl font-bold text-stone-900">{plan.price}</span>
                     {plan.period && (
-                      <span className={`text-sm ${plan.highlight ? "text-blue-200" : "text-zinc-400"}`}>{plan.period}</span>
+                      <span className="text-sm text-stone-400">{plan.period}</span>
                     )}
                   </div>
-                  <p className={`text-sm mb-5 ${plan.highlight ? "text-blue-100" : "text-zinc-500"}`}>{plan.desc}</p>
+                  <p className="text-sm mb-5 text-stone-500">{plan.desc}</p>
                   <ul className="space-y-2 mb-6">
                     {plan.features.map((f) => (
-                      <li key={f} className={`flex items-center gap-2 text-sm ${plan.highlight ? "text-white" : "text-zinc-700"}`}>
-                        <span className="text-green-400">✓</span>{f}
+                      <li key={f} className="flex items-center gap-2 text-sm text-stone-700">
+                        <span className="text-green-500">✓</span>{f}
                       </li>
                     ))}
                   </ul>
                   <Link
                     href="/contact"
                     className={`block text-center py-2.5 rounded-xl font-semibold text-sm transition-colors ${
-                      plan.highlight ? "bg-white text-blue-600 hover:bg-blue-50" : "bg-zinc-900 text-white hover:bg-zinc-700"
+                      plan.highlight ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-stone-900 text-white hover:bg-stone-800"
                     }`}
                   >
                     {plan.cta}
@@ -572,7 +574,7 @@ export default async function HomePage() {
               ))}
             </div>
             <div className="text-center mt-10">
-              <Link href="/pricing" className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
+              <Link href="/pricing" className="text-sm text-blue-700 hover:text-blue-800 font-medium transition-colors">
                 Se fullständiga priser →
               </Link>
             </div>
@@ -580,33 +582,35 @@ export default async function HomePage() {
         </section>
 
         {/* ── Section 9: Testimonial ────────────────────────── */}
-        <section className="max-w-4xl mx-auto px-6 py-28 text-center">
-          <div className="bg-white rounded-3xl border border-zinc-100 shadow-sm p-12">
-            <div className="text-5xl text-blue-100 mb-6 font-serif leading-none">&ldquo;</div>
-            <blockquote className="text-2xl md:text-3xl font-medium text-zinc-900 leading-snug tracking-tight mb-10">
-              ShopMan har förändrat hur vi hanterar vår e-handel. Allt på ett ställe, inget manuellt.
-            </blockquote>
-            <div className="flex items-center justify-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-200 to-blue-400 flex items-center justify-center text-white font-bold text-lg">
-                A
-              </div>
-              <div className="text-left">
-                <div className="text-sm font-semibold text-zinc-900">Anna Lindqvist</div>
-                <div className="text-xs text-zinc-400">E-handelschef, NordShop AB</div>
-              </div>
-              <div className="ml-4 w-24 h-8 rounded bg-zinc-100 flex items-center justify-center text-zinc-400 text-xs font-semibold">
-                NordShop
+        <section className="bg-stone-50">
+          <div className="max-w-4xl mx-auto px-6 py-28 text-center">
+            <div className="bg-white rounded-3xl border border-stone-200 shadow-sm p-12">
+              <div className="text-5xl text-stone-200 mb-6 font-serif leading-none">&ldquo;</div>
+              <blockquote className="text-2xl md:text-3xl font-medium text-stone-900 leading-snug tracking-tight mb-10">
+                ShopMan har förändrat hur vi hanterar vår e-handel. Allt på ett ställe, inget manuellt.
+              </blockquote>
+              <div className="flex items-center justify-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-200 to-blue-400 flex items-center justify-center text-white font-bold text-lg">
+                  A
+                </div>
+                <div className="text-left">
+                  <div className="text-sm font-semibold text-stone-900">Anna Lindqvist</div>
+                  <div className="text-xs text-stone-400">E-handelschef, NordShop AB</div>
+                </div>
+                <div className="ml-4 w-24 h-8 rounded bg-stone-100 flex items-center justify-center text-stone-400 text-xs font-semibold">
+                  NordShop
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         {/* ── Section 10: How it works ──────────────────────── */}
-        <section className="bg-zinc-950 py-28">
+        <section className="bg-white py-28">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-20">
-              <div className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-3">Kom igång</div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+              <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">Kom igång</div>
+              <h2 className="text-3xl md:text-4xl font-bold text-stone-900 tracking-tight">
                 Igång på några minuter
               </h2>
             </div>
@@ -614,13 +618,13 @@ export default async function HomePage() {
               {STEPS.map((s, i) => (
                 <div key={s.n} className="relative">
                   {i < STEPS.length - 1 && (
-                    <div className="hidden md:block absolute top-5 left-full w-full h-px bg-zinc-800" />
+                    <div className="hidden md:block absolute top-5 left-full w-full h-px bg-stone-200" />
                   )}
-                  <div className="w-10 h-10 rounded-full border border-zinc-700 flex items-center justify-center mb-5">
-                    <span className="text-xs font-mono font-bold text-zinc-400">{s.n}</span>
+                  <div className="mb-4">
+                    <span className="text-6xl font-bold text-stone-200 leading-none">{s.n}</span>
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">{s.title}</h3>
-                  <p className="text-sm text-zinc-400 leading-relaxed">{s.desc}</p>
+                  <h3 className="text-lg font-semibold text-stone-900 mb-2">{s.title}</h3>
+                  <p className="text-sm text-stone-500 leading-relaxed">{s.desc}</p>
                 </div>
               ))}
             </div>
@@ -628,59 +632,61 @@ export default async function HomePage() {
         </section>
 
         {/* ── Section 11: Blog / latest ─────────────────────── */}
-        <section className="max-w-7xl mx-auto px-6 py-28">
-          <div className="flex items-end justify-between mb-14">
-            <div>
-              <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">Blogg</div>
-              <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 tracking-tight">
-                Senaste nytt
-              </h2>
+        <section className="bg-stone-50 py-28">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="flex items-end justify-between mb-14">
+              <div>
+                <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">Blogg</div>
+                <h2 className="text-3xl md:text-4xl font-bold text-stone-900 tracking-tight">
+                  Senaste nytt
+                </h2>
+              </div>
+              <Link href="/blog" className="text-sm text-blue-700 hover:text-blue-800 font-medium transition-colors hidden sm:block">
+                Se alla artiklar →
+              </Link>
             </div>
-            <Link href="/blog" className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors hidden sm:block">
-              Se alla artiklar →
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {posts.map((post) => (
-              <article key={post.id} className="group bg-white rounded-2xl border border-zinc-100 overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-                <div className={`h-40 bg-gradient-to-br ${post.gradient}`} />
-                <div className="p-6">
-                  <div className="inline-block text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full mb-3">
-                    {post.category}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {posts.map((post) => (
+                <article key={post.id} className="group bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                  <div className={`h-40 bg-gradient-to-br ${post.gradient}`} />
+                  <div className="p-6">
+                    <div className="inline-block text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full mb-3">
+                      {post.category}
+                    </div>
+                    <h3 className="font-semibold text-stone-900 mb-2 leading-snug group-hover:text-blue-700 transition-colors">
+                      {post.title}
+                    </h3>
+                    <p className="text-sm text-stone-500 leading-relaxed mb-4 line-clamp-2">{post.excerpt}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-stone-400">{post.date}</span>
+                      <Link href="/blog" className="text-xs text-blue-700 font-medium hover:text-blue-800 transition-colors">
+                        Läs mer →
+                      </Link>
+                    </div>
                   </div>
-                  <h3 className="font-semibold text-zinc-900 mb-2 leading-snug group-hover:text-blue-600 transition-colors">
-                    {post.title}
-                  </h3>
-                  <p className="text-sm text-zinc-500 leading-relaxed mb-4 line-clamp-2">{post.excerpt}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-zinc-400">{post.date}</span>
-                    <Link href="/blog" className="text-xs text-blue-600 font-medium hover:text-blue-700 transition-colors">
-                      Läs mer →
-                    </Link>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-          <div className="text-center mt-8 sm:hidden">
-            <Link href="/blog" className="text-sm text-blue-600 font-medium">Se alla artiklar →</Link>
+                </article>
+              ))}
+            </div>
+            <div className="text-center mt-8 sm:hidden">
+              <Link href="/blog" className="text-sm text-blue-700 font-medium">Se alla artiklar →</Link>
+            </div>
           </div>
         </section>
 
         {/* ── Section 12: FAQ ───────────────────────────────── */}
-        <section className="bg-zinc-50 py-28">
+        <section className="bg-white py-28">
           <div className="max-w-2xl mx-auto px-6">
             <div className="text-center mb-14">
               <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">Support</div>
-              <h2 className="text-3xl md:text-4xl font-bold text-zinc-950 tracking-tight">
+              <h2 className="text-3xl md:text-4xl font-bold text-stone-900 tracking-tight">
                 Vanliga frågor
               </h2>
             </div>
             <FaqAccordion items={faqs} />
             <div className="text-center mt-10">
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-stone-500">
                 Hittar du inte svaret?{" "}
-                <Link href="/contact" className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                <Link href="/contact" className="text-blue-700 hover:text-blue-800 font-medium transition-colors">
                   Kontakta oss
                 </Link>
               </p>
@@ -689,33 +695,27 @@ export default async function HomePage() {
         </section>
 
         {/* ── Section 13: Footer CTA ────────────────────────── */}
-        <section className="max-w-7xl mx-auto px-6 py-20 pb-28">
-          <div className="bg-blue-600 rounded-3xl px-8 py-16 text-center relative overflow-hidden">
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white blur-3xl" />
-              <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-white blur-3xl" />
-            </div>
-            <div className="relative">
-              <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight mb-4">
-                Redo att sätta igång?
-              </h2>
-              <p className="text-blue-100 mb-8 max-w-md mx-auto">
-                Anslut dig till hundratals handlare som driver sin e-handel med ShopMan.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link
-                  href="/contact"
-                  className="inline-flex items-center justify-center bg-white hover:bg-blue-50 text-blue-600 font-semibold px-8 py-3 rounded-xl transition-colors text-sm shadow-lg"
-                >
-                  Starta din gratis provperiod
-                </Link>
-                <Link
-                  href="/demo"
-                  className="inline-flex items-center justify-center text-white/80 hover:text-white font-medium px-6 py-3 rounded-xl transition-colors text-sm border border-white/20 hover:border-white/40"
-                >
-                  Se demo →
-                </Link>
-              </div>
+        <section className="bg-stone-900 py-32">
+          <div className="max-w-7xl mx-auto px-6 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight mb-4">
+              Redo att sätta igång?
+            </h2>
+            <p className="text-stone-400 mb-10 max-w-md mx-auto leading-relaxed">
+              Anslut dig till hundratals handlare som driver sin e-handel med ShopMan.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center bg-white hover:bg-stone-100 text-stone-900 font-semibold px-8 py-3 rounded-xl transition-colors text-sm"
+              >
+                Starta din gratis provperiod
+              </Link>
+              <Link
+                href="/demo"
+                className="inline-flex items-center justify-center text-stone-400 hover:text-white font-medium px-6 py-3 rounded-xl transition-colors text-sm border border-stone-700 hover:border-stone-500"
+              >
+                Se demo →
+              </Link>
             </div>
           </div>
         </section>

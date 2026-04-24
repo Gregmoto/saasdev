@@ -34,3 +34,4 @@ export * from "./b2b.js";
 export * from "./marketing-cms.js";
 export * from "./leads.js";
 export * from "./status.js";
+export * from "./store-faqs.js";
