@@ -7,6 +7,8 @@ import { cn } from "@saas-shop/ui";
 const NAV = [
   { label: "Dashboard", href: "/dashboard", icon: "🏠" },
   { label: "Products", href: "/products", icon: "📦" },
+  { label: "Kategorier", href: "/categories", icon: "🗂️" },
+  { label: "Varumärken", href: "/brands", icon: "🏷️" },
   { label: "Orders", href: "/orders", icon: "🛒" },
   { label: "Customers", href: "/customers", icon: "👤" },
   { label: "Inventory", href: "/inventory", icon: "🏪" },
