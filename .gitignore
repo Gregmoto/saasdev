@@ -1,6 +1,8 @@
 node_modules/
 dist/
+.next/
 .env
 *.local
 .DS_Store
+*.tsbuildinfo
 # migrations are committed to version control — do NOT ignore this directory
