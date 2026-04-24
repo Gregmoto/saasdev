@@ -36,6 +36,8 @@ import { requirePlatformAdmin } from "../hooks/require-platform-admin.js";
 const EXEMPT_PREFIXES = [
   "/api/public/",
   "/api/webhooks/",
+  "/api/widget/",   // public storefront widget routes (chat, affiliate redirect)
+  "/api/cms/",      // public CMS read routes (marketing site)
 ] as const;
 
 type HandlerFn = (...args: unknown[]) => unknown;
