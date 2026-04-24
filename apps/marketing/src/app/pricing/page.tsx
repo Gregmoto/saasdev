@@ -9,6 +9,42 @@ import { Footer } from "@/components/footer";
 
 const PLANS = [
   {
+    id: "free",
+    name: "Free",
+    price: 0,
+    priceYearly: 0, // per month, billed yearly
+    tagline: "Kom igång utan kostnad. Testa ShopMan med en riktig butik.",
+    highlight: false,
+    badge: null,
+    limits: {
+      products: "250",
+      orders: "100/mån",
+      users: "1",
+      markets: "1",
+      api_calls: "500/dag",
+      warehouses: "1",
+    },
+    features: [
+      "Upp till 250 produkter",
+      "Upp till 100 ordrar/månad",
+      "Webshop",
+      "Grundläggande SEO",
+      "Klarna-betalningar",
+      "Swish-betalningar",
+    ],
+    missing: [
+      "Multishop",
+      "API-åtkomst",
+      "Fortnox-integration",
+      "Leverantörssynk",
+      "Prioriterad support",
+      "CSV-import",
+      "Inga produktvariantsgränser",
+    ],
+    cta: "Starta gratis",
+    ctaHref: "https://admin-production-42ec.up.railway.app/login",
+  },
+  {
     id: "starter",
     name: "Starter",
     price: 299,
@@ -112,30 +148,35 @@ const PLANS = [
 // ─── Feature comparison table ─────────────────────────────────────────────────
 
 const FEATURE_ROWS = [
-  { label: "Produkter", starter: "Obegränsat", growth: "Obegränsat", enterprise: "Obegränsat", group: "Begränsningar" },
-  { label: "Marknader / butiker", starter: "1", growth: "5", enterprise: "Obegränsat", group: "Begränsningar" },
-  { label: "API-anrop/mån", starter: "10 000", growth: "100 000", enterprise: "Obegränsat", group: "Begränsningar" },
-  { label: "Lagerplatser", starter: "1", growth: "3", enterprise: "Obegränsat", group: "Begränsningar" },
-  { label: "Användare", starter: "3", growth: "10", enterprise: "Obegränsat", group: "Begränsningar" },
-  { label: "Webshop", starter: "✓", growth: "✓", enterprise: "✓", group: "Grundfunktioner" },
-  { label: "CSV-import", starter: "✓", growth: "✓", enterprise: "✓", group: "Grundfunktioner" },
-  { label: "Klarna & Swish", starter: "✓", growth: "✓", enterprise: "✓", group: "Grundfunktioner" },
-  { label: "Grundläggande SEO", starter: "✓", growth: "✓", enterprise: "✓", group: "Grundfunktioner" },
-  { label: "Multishop", starter: "✗", growth: "✓", enterprise: "✓", group: "Tillväxtfunktioner" },
-  { label: "Fortnox-integration", starter: "✗", growth: "✓", enterprise: "✓", group: "Tillväxtfunktioner" },
-  { label: "API-åtkomst", starter: "✗", growth: "✓", enterprise: "✓", group: "Tillväxtfunktioner" },
-  { label: "Leverantörssynk", starter: "✗", growth: "✓", enterprise: "✓", group: "Tillväxtfunktioner" },
-  { label: "Avancerad SEO", starter: "✗", growth: "✓", enterprise: "✓", group: "Tillväxtfunktioner" },
-  { label: "Flera anpassade domäner", starter: "✗", growth: "✓", enterprise: "✓", group: "Tillväxtfunktioner" },
-  { label: "Marknadsplats", starter: "✗", growth: "✗", enterprise: "✓", group: "Enterprise" },
-  { label: "B2B-prissättning", starter: "✗", growth: "✗", enterprise: "✓", group: "Enterprise" },
-  { label: "White-label", starter: "✗", growth: "✗", enterprise: "✓", group: "Enterprise" },
-  { label: "SLA-garanti", starter: "✗", growth: "✗", enterprise: "✓", group: "Enterprise" },
-  { label: "Dedikerad infrastruktur", starter: "✗", growth: "✗", enterprise: "✓", group: "Enterprise" },
-  { label: "Support", starter: "E-post", growth: "Prioriterad", enterprise: "Dedikerad", group: "Support" },
+  { label: "Produkter", free: "250", starter: "Obegränsat", growth: "Obegränsat", enterprise: "Obegränsat", group: "Begränsningar" },
+  { label: "Ordrar/månad", free: "100", starter: "Obegränsat", growth: "Obegränsat", enterprise: "Obegränsat", group: "Begränsningar" },
+  { label: "Marknader / butiker", free: "1", starter: "1", growth: "5", enterprise: "Obegränsat", group: "Begränsningar" },
+  { label: "API-anrop/mån", free: "500/dag", starter: "10 000", growth: "100 000", enterprise: "Obegränsat", group: "Begränsningar" },
+  { label: "Lagerplatser", free: "1", starter: "1", growth: "3", enterprise: "Obegränsat", group: "Begränsningar" },
+  { label: "Användare", free: "1", starter: "3", growth: "10", enterprise: "Obegränsat", group: "Begränsningar" },
+  { label: "Webshop", free: "✓", starter: "✓", growth: "✓", enterprise: "✓", group: "Grundfunktioner" },
+  { label: "CSV-import", free: "✗", starter: "✓", growth: "✓", enterprise: "✓", group: "Grundfunktioner" },
+  { label: "Klarna & Swish", free: "✓", starter: "✓", growth: "✓", enterprise: "✓", group: "Grundfunktioner" },
+  { label: "Grundläggande SEO", free: "✓", starter: "✓", growth: "✓", enterprise: "✓", group: "Grundfunktioner" },
+  { label: "Multishop", free: "✗", starter: "✗", growth: "✓", enterprise: "✓", group: "Tillväxtfunktioner" },
+  { label: "Fortnox-integration", free: "✗", starter: "✗", growth: "✓", enterprise: "✓", group: "Tillväxtfunktioner" },
+  { label: "API-åtkomst", free: "✗", starter: "✗", growth: "✓", enterprise: "✓", group: "Tillväxtfunktioner" },
+  { label: "Leverantörssynk", free: "✗", starter: "✗", growth: "✓", enterprise: "✓", group: "Tillväxtfunktioner" },
+  { label: "Avancerad SEO", free: "✗", starter: "✗", growth: "✓", enterprise: "✓", group: "Tillväxtfunktioner" },
+  { label: "Flera anpassade domäner", free: "✗", starter: "✗", growth: "✓", enterprise: "✓", group: "Tillväxtfunktioner" },
+  { label: "Marknadsplats", free: "✗", starter: "✗", growth: "✗", enterprise: "✓", group: "Enterprise" },
+  { label: "B2B-prissättning", free: "✗", starter: "✗", growth: "✗", enterprise: "✓", group: "Enterprise" },
+  { label: "White-label", free: "✗", starter: "✗", growth: "✗", enterprise: "✓", group: "Enterprise" },
+  { label: "SLA-garanti", free: "✗", starter: "✗", growth: "✗", enterprise: "✓", group: "Enterprise" },
+  { label: "Dedikerad infrastruktur", free: "✗", starter: "✗", growth: "✗", enterprise: "✓", group: "Enterprise" },
+  { label: "Support", free: "Community", starter: "E-post", growth: "Prioriterad", enterprise: "Dedikerad", group: "Support" },
 ];
 
 const FAQ = [
+  {
+    question: "Vad händer när jag når Free-planens gränser?",
+    answer: "När du når 250 produkter eller 100 ordrar i månaden blockeras nya skapanden tills du uppgraderar. Du förlorar ingen data — allt finns kvar. Uppgradering till Starter ger obegränsade produkter och ordrar från 299 kr/månad.",
+  },
   {
     question: "Är det någon bindningstid?",
     answer: "Nej. Alla planer är månadsbaserade utan bindningstid. Du kan uppgradera, nedgradera eller avsluta när som helst. Vid årsabonnemang erbjuder vi 2 månaders rabatt men återbetalning sker pro rata om du avslutar i förtid.",
@@ -211,7 +252,7 @@ export default function PricingPage() {
               Enkel prissättning. Inga överraskningar.
             </h1>
             <p className="text-lg text-zinc-600 max-w-2xl mx-auto mb-10">
-              Alla planer inkluderar 14 dagars gratis provperiod. Inget kreditkort krävs.
+              Alla planer inkluderar 14 dagars gratis provperiod. Starta gratis. Uppgradera när du växer.
             </p>
 
             {/* Monthly/yearly toggle */}
@@ -237,9 +278,10 @@ export default function PricingPage() {
 
         {/* Pricing cards */}
         <section className="max-w-6xl mx-auto px-4 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {PLANS.map(plan => {
               const price = yearly ? plan.priceYearly : plan.price;
+              const isFree = plan.id === "free";
               return (
                 <div
                   key={plan.id}
@@ -263,10 +305,17 @@ export default function PricingPage() {
                     {price !== null ? (
                       <>
                         <span className={`text-4xl font-bold ${plan.highlight ? "text-white" : "text-zinc-900"}`}>
-                          {(yearly ? plan.priceYearly : plan.price)?.toLocaleString("sv-SE")} kr
+                          {isFree ? "Gratis" : `${(yearly ? plan.priceYearly : plan.price)?.toLocaleString("sv-SE")} kr`}
                         </span>
-                        <span className={`text-sm ml-1 ${plan.highlight ? "text-blue-200" : "text-zinc-400"}`}>/mån</span>
-                        {yearly && (
+                        {!isFree && (
+                          <span className={`text-sm ml-1 ${plan.highlight ? "text-blue-200" : "text-zinc-400"}`}>/mån</span>
+                        )}
+                        {isFree && (
+                          <div className={`text-xs mt-1 ${plan.highlight ? "text-blue-200" : "text-zinc-400"}`}>
+                            0 kr/mån
+                          </div>
+                        )}
+                        {yearly && !isFree && (
                           <div className={`text-xs mt-1 ${plan.highlight ? "text-blue-200" : "text-zinc-400"}`}>
                             Faktureras {((yearly ? plan.priceYearly ?? 0 : plan.price ?? 0) * 12).toLocaleString("sv-SE")} kr/år
                           </div>
@@ -278,13 +327,20 @@ export default function PricingPage() {
                       </span>
                     )}
                   </div>
-                  <p className={`text-sm mb-6 ${plan.highlight ? "text-blue-100" : "text-zinc-500"}`}>{plan.tagline}</p>
+                  <p className={`text-sm mb-4 ${plan.highlight ? "text-blue-100" : "text-zinc-500"}`}>{plan.tagline}</p>
+
+                  {isFree && (
+                    <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4">
+                      250 produkter · 100 ordrar/mån · Uppgradera när du växer
+                    </div>
+                  )}
 
                   {/* Limits */}
                   <div className={`rounded-xl p-4 mb-6 space-y-2 text-sm ${plan.highlight ? "bg-white/10" : "bg-zinc-50"}`}>
                     {Object.entries(plan.limits).map(([key, val]) => {
                       const labels: Record<string, string> = {
                         products: "Produkter",
+                        orders: "Ordrar/mån",
                         markets: "Marknader",
                         api_calls: "API-anrop",
                         warehouses: "Lagerplatser",
@@ -304,6 +360,12 @@ export default function PricingPage() {
                     {plan.features.map(f => (
                       <li key={f} className={`flex items-center gap-2 text-sm ${plan.highlight ? "text-white" : "text-zinc-700"}`}>
                         <span className={plan.highlight ? "text-green-300" : "text-green-500"}>✓</span>
+                        {f}
+                      </li>
+                    ))}
+                    {plan.missing.map(f => (
+                      <li key={f} className={`flex items-center gap-2 text-sm ${plan.highlight ? "text-blue-300" : "text-zinc-400"}`}>
+                        <span>✗</span>
                         {f}
                       </li>
                     ))}
@@ -344,22 +406,18 @@ export default function PricingPage() {
                 {groups.map(group => (
                   <>
                     <tr key={`group-${group}`} className="bg-zinc-50">
-                      <td colSpan={4} className="px-6 py-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                      <td colSpan={5} className="px-6 py-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                         {group}
                       </td>
                     </tr>
                     {FEATURE_ROWS.filter(r => r.group === group).map((row, i) => (
                       <tr key={row.label} className={i % 2 === 0 ? "bg-white" : "bg-zinc-50/50"}>
                         <td className="px-6 py-3 text-zinc-700">{row.label}</td>
-                        <td className="px-6 py-3 text-center">
-                          <FeatureValue value={row.starter} highlight={false} />
-                        </td>
-                        <td className="px-6 py-3 text-center bg-blue-50/50">
-                          <FeatureValue value={row.growth} highlight={false} />
-                        </td>
-                        <td className="px-6 py-3 text-center">
-                          <FeatureValue value={row.enterprise} highlight={false} />
-                        </td>
+                        {PLANS.map(plan => (
+                          <td key={plan.id} className={`px-6 py-3 text-center${plan.highlight ? " bg-blue-50/50" : ""}`}>
+                            <FeatureValue value={(row as Record<string, string>)[plan.id] ?? ""} highlight={false} />
+                          </td>
+                        ))}
                       </tr>
                     ))}
                   </>

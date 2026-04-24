@@ -3,6 +3,8 @@ import { requireAuth } from "../../hooks/require-auth.js";
 import { requireStoreAccountContext } from "../../hooks/require-store-account.js";
 import { requirePlatformAdmin } from "../../hooks/require-platform-admin.js";
 import * as PlansService from "./service.js";
+import { countProducts } from "../products/service.js";
+import { countOrders } from "../orders/service.js";
 import { recordAuditEvent } from "../security/service.js";
 import {
   createPlanSchema,
@@ -33,6 +35,48 @@ export async function plansRoutes(app: FastifyInstance): Promise<void> {
         PlansService.getFeatureFlags(app.db, request.storeAccount.id),
       ]);
       return reply.send({ plan, effectiveLimits: limits, features, featureFlags: flags });
+    },
+  );
+
+  // ── Store: plan usage ─────────────────────────────────────────────────────
+  app.get(
+    "/api/plan-usage",
+    { preHandler: [requireAuth, requireStoreAccountContext] },
+    async (request, reply) => {
+      const storeId = request.storeAccount.id;
+      const [planRow, limits, productCount, orderCount] = await Promise.all([
+        PlansService.getStorePlan(app.db, storeId),
+        PlansService.getEffectiveLimits(app.db, storeId),
+        countProducts(app.db, storeId),
+        countOrders(app.db, storeId),
+      ]);
+
+      const plan = planRow?.plan ?? null;
+
+      function buildDimension(current: number, limit: number | null | undefined) {
+        if (limit == null) {
+          return { current, limit: null, pct: null, nearLimit: false, atLimit: false };
+        }
+        const pct = Math.round((current / limit) * 100);
+        return {
+          current,
+          limit,
+          pct,
+          nearLimit: pct >= 80,
+          atLimit: current >= limit,
+        };
+      }
+
+      return reply.send({
+        plan: plan
+          ? { slug: plan.slug, name: plan.name, monthlyPriceCents: plan.monthlyPriceCents }
+          : null,
+        usage: {
+          products: buildDimension(productCount, limits.maxProducts),
+          orders: buildDimension(orderCount, limits.maxOrders),
+        },
+        upgradeUrl: "/admin/billing",
+      });
     },
   );
 

@@ -1,4 +1,4 @@
-import { and, eq, ilike, desc, asc, count, sql, or } from "drizzle-orm";
+import { and, eq, ilike, desc, asc, count, sql, or, gte } from "drizzle-orm";
 import type { Db } from "../../db/client.js";
 import { orders, orderItems, customerShops } from "../../db/schema/index.js";
 import { customers } from "../../db/schema/index.js";
@@ -386,10 +386,18 @@ export async function updateFulfillmentStatus(
 // ── Count orders ──────────────────────────────────────────────────────────────
 
 export async function countOrders(db: Db, storeAccountId: string): Promise<number> {
+  // Count orders created in the CURRENT calendar month (UTC).
+  const now = new Date();
+  const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
   const [row] = await db
     .select({ total: count() })
     .from(orders)
-    .where(eq(orders.storeAccountId, storeAccountId));
+    .where(
+      and(
+        eq(orders.storeAccountId, storeAccountId),
+        gte(orders.createdAt, monthStart),
+      ),
+    );
   return row?.total ?? 0;
 }
 
