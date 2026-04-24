@@ -17,9 +17,12 @@ import {
   variantParamsSchema,
   createCategorySchema,
   updateCategorySchema,
+  createBrandSchema,
+  updateBrandSchema,
+  brandIdParamSchema,
 } from "./schemas.js";
 
-const storePreHandler = [requireAuth, requireStoreAccountContext] as const;
+const storePreHandler = [requireAuth, requireStoreAccountContext];
 
 export async function productsRoutes(app: FastifyInstance): Promise<void> {
 
@@ -350,6 +353,110 @@ export async function productsRoutes(app: FastifyInstance): Promise<void> {
           message: "Variant not found",
         });
       }
+
+      return reply.status(204).send();
+    },
+  );
+
+  // ── Brands ──────────────────────────────────────────────────────────────────
+
+  app.get(
+    "/api/products/brands",
+    { preHandler: [...storePreHandler] },
+    async (request, reply) => {
+      const brandList = await ProductsService.listBrands(
+        app.db,
+        request.storeAccount.id,
+      );
+      return reply.send(brandList);
+    },
+  );
+
+  app.post(
+    "/api/products/brands",
+    { preHandler: [...storePreHandler] },
+    async (request, reply) => {
+      const body = createBrandSchema.parse(request.body);
+      const brand = await ProductsService.createBrand(
+        app.db,
+        request.storeAccount.id,
+        body,
+      );
+
+      await recordAuditEvent(app.db, {
+        eventType: "create",
+        actionType: "create",
+        entityType: "brand",
+        entityId: brand.id,
+        actorUserId: request.currentUser.id,
+        storeAccountId: request.storeAccount.id,
+        afterState: { name: brand.name, slug: brand.slug },
+        ipAddress: request.ip,
+        userAgent: request.headers["user-agent"],
+      });
+
+      return reply.status(201).send(brand);
+    },
+  );
+
+  app.patch(
+    "/api/products/brands/:brandId",
+    { preHandler: [...storePreHandler] },
+    async (request, reply) => {
+      const { brandId } = brandIdParamSchema.parse(request.params);
+      const body = updateBrandSchema.parse(request.body);
+      const brand = await ProductsService.updateBrand(
+        app.db,
+        brandId,
+        request.storeAccount.id,
+        body,
+      );
+
+      await recordAuditEvent(app.db, {
+        eventType: "update",
+        actionType: "update",
+        entityType: "brand",
+        entityId: brandId,
+        actorUserId: request.currentUser.id,
+        storeAccountId: request.storeAccount.id,
+        afterState: body as Record<string, unknown>,
+        ipAddress: request.ip,
+        userAgent: request.headers["user-agent"],
+      });
+
+      return reply.send(brand);
+    },
+  );
+
+  app.delete(
+    "/api/products/brands/:brandId",
+    { preHandler: [...storePreHandler] },
+    async (request, reply) => {
+      const { brandId } = brandIdParamSchema.parse(request.params);
+      const deleted = await ProductsService.deleteBrand(
+        app.db,
+        brandId,
+        request.storeAccount.id,
+      );
+
+      if (!deleted) {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: "Not Found",
+          message: "Brand not found",
+        });
+      }
+
+      await recordAuditEvent(app.db, {
+        eventType: "delete",
+        actionType: "delete",
+        entityType: "brand",
+        entityId: brandId,
+        actorUserId: request.currentUser.id,
+        storeAccountId: request.storeAccount.id,
+        ipAddress: request.ip,
+        userAgent: request.headers["user-agent"],
+      });
 
       return reply.status(204).send();
     },

@@ -46,6 +46,8 @@ export const productQuerySchema = z.object({
   search: z.string().optional(),
   status: productStatusEnum.optional(),
   categoryId: z.string().uuid().optional(),
+  brandId: z.string().uuid().optional(),
+  type: z.enum(["simple", "variable", "bundle"]).optional(),
   // When shopId is provided, the response includes per-shop isPublished status.
   // Use "*" or omit for the master "All shops" view.
   shopId: z.string().uuid().optional(),
@@ -95,6 +97,26 @@ export const createCategorySchema = z.object({
   parentId: z.string().uuid().optional(),
   description: z.string().optional(),
   sortOrder: z.number().int().optional(),
+  seoTitle: z.string().max(255).optional(),
+  seoDescription: z.string().max(500).optional(),
+  seoKeywords: z.string().optional(),
+  imageUrl: z.string().url().optional(),
 });
 
 export const updateCategorySchema = createCategorySchema.partial();
+
+// ── Brand schemas ─────────────────────────────────────────────────────────────
+
+export const createBrandSchema = z.object({
+  name: z.string().min(1).max(255),
+  slug: slugField,
+  description: z.string().optional(),
+  logoUrl: z.string().url().optional(),
+  seoTitle: z.string().max(255).optional(),
+  seoDescription: z.string().max(500).optional(),
+  seoKeywords: z.string().optional(),
+  sortOrder: z.number().int().optional(),
+});
+
+export const updateBrandSchema = createBrandSchema.partial();
+export const brandIdParamSchema = z.object({ brandId: z.string().uuid() });

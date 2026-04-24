@@ -1,6 +1,6 @@
 import { eq, and, ilike, desc, asc, count, inArray } from "drizzle-orm";
 import type { Db } from "../../db/client.js";
-import { products, productVariants, productCategories, shopProductVisibility } from "../../db/schema/index.js";
+import { products, productVariants, productCategories, shopProductVisibility, brands } from "../../db/schema/index.js";
 import type { z } from "zod";
 import type {
   createProductSchema,
@@ -10,6 +10,8 @@ import type {
   createCategorySchema,
   updateCategorySchema,
   productQuerySchema,
+  createBrandSchema,
+  updateBrandSchema,
 } from "./schemas.js";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -21,6 +23,8 @@ type UpdateVariantData = z.infer<typeof updateVariantSchema>;
 type CreateCategoryData = z.infer<typeof createCategorySchema>;
 type UpdateCategoryData = z.infer<typeof updateCategorySchema>;
 type ProductQueryOpts = z.infer<typeof productQuerySchema>;
+type CreateBrandData = z.infer<typeof createBrandSchema>;
+type UpdateBrandData = z.infer<typeof updateBrandSchema>;
 
 // ── Categories ────────────────────────────────────────────────────────────────
 
@@ -46,6 +50,10 @@ export async function createCategory(
       ...(data.parentId !== undefined && { parentId: data.parentId }),
       ...(data.description !== undefined && { description: data.description }),
       ...(data.sortOrder !== undefined && { sortOrder: data.sortOrder }),
+      ...(data.seoTitle !== undefined && { seoTitle: data.seoTitle }),
+      ...(data.seoDescription !== undefined && { seoDescription: data.seoDescription }),
+      ...(data.seoKeywords !== undefined && { seoKeywords: data.seoKeywords }),
+      ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
     })
     .returning();
   if (!row) throw new Error("Failed to create category");
@@ -64,6 +72,10 @@ export async function updateCategory(
   if (data.parentId !== undefined) set["parentId"] = data.parentId;
   if (data.description !== undefined) set["description"] = data.description;
   if (data.sortOrder !== undefined) set["sortOrder"] = data.sortOrder;
+  if (data.seoTitle !== undefined) set["seoTitle"] = data.seoTitle;
+  if (data.seoDescription !== undefined) set["seoDescription"] = data.seoDescription;
+  if (data.seoKeywords !== undefined) set["seoKeywords"] = data.seoKeywords;
+  if (data.imageUrl !== undefined) set["imageUrl"] = data.imageUrl;
 
   const [row] = await db
     .update(productCategories)
@@ -103,7 +115,7 @@ export async function listProducts(
   storeAccountId: string,
   opts: ProductQueryOpts,
 ) {
-  const { page, limit, search, status, categoryId, shopId, sort = "createdAt", order = "desc" } = opts;
+  const { page, limit, search, status, categoryId, brandId, type, shopId, sort = "createdAt", order = "desc" } = opts;
   const offset = (page - 1) * limit;
 
   // Build the where conditions.
@@ -111,6 +123,8 @@ export async function listProducts(
   if (search) conditions.push(ilike(products.name, `%${search}%`));
   if (status) conditions.push(eq(products.status, status));
   if (categoryId) conditions.push(eq(products.categoryId, categoryId));
+  if (brandId) conditions.push(eq(products.brandId, brandId));
+  if (type) conditions.push(eq(products.type, type));
 
   const where = and(...conditions);
 
@@ -251,8 +265,10 @@ export async function createProduct(
       slug: data.slug,
       priceCents: data.priceCents,
       ...(data.status !== undefined && { status: data.status }),
+      ...(data.type !== undefined && { type: data.type }),
       ...(data.description !== undefined && { description: data.description }),
       ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
+      ...(data.brandId !== undefined && { brandId: data.brandId }),
       ...(data.compareAtPriceCents !== undefined && {
         compareAtPriceCents: data.compareAtPriceCents,
       }),
@@ -265,6 +281,9 @@ export async function createProduct(
       ...(data.sku !== undefined && { sku: data.sku }),
       ...(data.barcode !== undefined && { barcode: data.barcode }),
       ...(data.images !== undefined && { images: data.images }),
+      ...(data.seoTitle !== undefined && { seoTitle: data.seoTitle }),
+      ...(data.seoDescription !== undefined && { seoDescription: data.seoDescription }),
+      ...(data.seoKeywords !== undefined && { seoKeywords: data.seoKeywords }),
     })
     .returning();
   if (!row) throw new Error("Failed to create product");
@@ -282,8 +301,10 @@ export async function updateProduct(
   if (data.slug !== undefined) set["slug"] = data.slug;
   if (data.priceCents !== undefined) set["priceCents"] = data.priceCents;
   if (data.status !== undefined) set["status"] = data.status;
+  if (data.type !== undefined) set["type"] = data.type;
   if (data.description !== undefined) set["description"] = data.description;
   if (data.categoryId !== undefined) set["categoryId"] = data.categoryId;
+  if (data.brandId !== undefined) set["brandId"] = data.brandId;
   if (data.compareAtPriceCents !== undefined) set["compareAtPriceCents"] = data.compareAtPriceCents;
   if (data.taxable !== undefined) set["taxable"] = data.taxable;
   if (data.trackInventory !== undefined) set["trackInventory"] = data.trackInventory;
@@ -292,6 +313,9 @@ export async function updateProduct(
   if (data.sku !== undefined) set["sku"] = data.sku;
   if (data.barcode !== undefined) set["barcode"] = data.barcode;
   if (data.images !== undefined) set["images"] = data.images;
+  if (data.seoTitle !== undefined) set["seoTitle"] = data.seoTitle;
+  if (data.seoDescription !== undefined) set["seoDescription"] = data.seoDescription;
+  if (data.seoKeywords !== undefined) set["seoKeywords"] = data.seoKeywords;
   if (data.publishedAt !== undefined) set["publishedAt"] = new Date(data.publishedAt);
 
   const [row] = await db
@@ -446,5 +470,85 @@ export async function deleteVariant(
       ),
     )
     .returning({ id: productVariants.id });
+  return rows.length > 0;
+}
+
+// ── Brands ────────────────────────────────────────────────────────────────────
+
+export async function listBrands(db: Db, storeAccountId: string) {
+  return db
+    .select()
+    .from(brands)
+    .where(eq(brands.storeAccountId, storeAccountId))
+    .orderBy(asc(brands.sortOrder), asc(brands.name));
+}
+
+export async function createBrand(
+  db: Db,
+  storeAccountId: string,
+  data: CreateBrandData,
+) {
+  const [row] = await db
+    .insert(brands)
+    .values({
+      storeAccountId,
+      name: data.name,
+      slug: data.slug,
+      ...(data.description !== undefined && { description: data.description }),
+      ...(data.logoUrl !== undefined && { logoUrl: data.logoUrl }),
+      ...(data.seoTitle !== undefined && { seoTitle: data.seoTitle }),
+      ...(data.seoDescription !== undefined && { seoDescription: data.seoDescription }),
+      ...(data.seoKeywords !== undefined && { seoKeywords: data.seoKeywords }),
+      ...(data.sortOrder !== undefined && { sortOrder: data.sortOrder }),
+    })
+    .returning();
+  if (!row) throw new Error("Failed to create brand");
+  return row;
+}
+
+export async function updateBrand(
+  db: Db,
+  brandId: string,
+  storeAccountId: string,
+  data: UpdateBrandData,
+) {
+  const set: Record<string, unknown> = { updatedAt: new Date() };
+  if (data.name !== undefined) set["name"] = data.name;
+  if (data.slug !== undefined) set["slug"] = data.slug;
+  if (data.description !== undefined) set["description"] = data.description;
+  if (data.logoUrl !== undefined) set["logoUrl"] = data.logoUrl;
+  if (data.seoTitle !== undefined) set["seoTitle"] = data.seoTitle;
+  if (data.seoDescription !== undefined) set["seoDescription"] = data.seoDescription;
+  if (data.seoKeywords !== undefined) set["seoKeywords"] = data.seoKeywords;
+  if (data.sortOrder !== undefined) set["sortOrder"] = data.sortOrder;
+
+  const [row] = await db
+    .update(brands)
+    .set(set)
+    .where(
+      and(
+        eq(brands.id, brandId),
+        eq(brands.storeAccountId, storeAccountId),
+      ),
+    )
+    .returning();
+  if (!row) throw Object.assign(new Error("Brand not found"), { statusCode: 404 });
+  return row;
+}
+
+export async function deleteBrand(
+  db: Db,
+  brandId: string,
+  storeAccountId: string,
+): Promise<boolean> {
+  const rows = await db
+    .delete(brands)
+    .where(
+      and(
+        eq(brands.id, brandId),
+        eq(brands.storeAccountId, storeAccountId),
+      ),
+    )
+    .returning({ id: brands.id });
   return rows.length > 0;
 }
