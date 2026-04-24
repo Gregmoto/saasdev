@@ -28,6 +28,30 @@ export const productTypeEnum = pgEnum("product_type", [
   "bundle",    // composed of component products/variants
 ]);
 
+// ── brands ────────────────────────────────────────────────────────────────────
+
+export const brands = pgTable(
+  "brands",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    storeAccountId: uuid("store_account_id").notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    slug: varchar("slug", { length: 255 }).notNull(),
+    description: text("description"),
+    logoUrl: text("logo_url"),
+    seoTitle: varchar("seo_title", { length: 255 }),
+    seoDescription: varchar("seo_description", { length: 500 }),
+    seoKeywords: text("seo_keywords"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    storeAccountIdx: index("brands_store_account_idx").on(t.storeAccountId),
+    storeSlugIdx: uniqueIndex("brands_store_slug_idx").on(t.storeAccountId, t.slug),
+  }),
+);
+
 // ── product_categories ────────────────────────────────────────────────────────
 
 export const productCategories = pgTable(
@@ -40,6 +64,10 @@ export const productCategories = pgTable(
     parentId: uuid("parent_id"),
     description: text("description"),
     sortOrder: integer("sort_order").notNull().default(0),
+    seoTitle: varchar("seo_title", { length: 255 }),
+    seoDescription: varchar("seo_description", { length: 500 }),
+    seoKeywords: text("seo_keywords"),
+    imageUrl: text("image_url"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -57,6 +85,7 @@ export const products = pgTable(
     id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
     storeAccountId: uuid("store_account_id").notNull(),
     categoryId: uuid("category_id").references(() => productCategories.id, { onDelete: "set null" }),
+    brandId: uuid("brand_id").references(() => brands.id, { onDelete: "set null" }),
     name: varchar("name", { length: 255 }).notNull(),
     slug: varchar("slug", { length: 255 }).notNull(),
     description: text("description"),
@@ -75,6 +104,9 @@ export const products = pgTable(
       .$type<Array<{ url: string; alt: string }>>()
       .default(sql`'[]'::jsonb`),
     metadata: jsonb("metadata").$type<Record<string, unknown>>().default(sql`'{}'::jsonb`),
+    seoTitle: varchar("seo_title", { length: 255 }),
+    seoDescription: varchar("seo_description", { length: 500 }),
+    seoKeywords: text("seo_keywords"),
     publishedAt: timestamp("published_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -83,6 +115,7 @@ export const products = pgTable(
     storeAccountIdx: index("products_store_account_id_idx").on(t.storeAccountId),
     statusIdx: index("products_status_idx").on(t.status),
     storeSlugIdx: uniqueIndex("products_store_slug_idx").on(t.storeAccountId, t.slug),
+    brandIdx: index("products_brand_id_idx").on(t.brandId),
   }),
 );
 
@@ -119,5 +152,7 @@ export const productVariants = pgTable(
 export type Product = typeof products.$inferSelect;
 export type ProductVariant = typeof productVariants.$inferSelect;
 export type ProductCategory = typeof productCategories.$inferSelect;
+export type Brand = typeof brands.$inferSelect;
+export type NewBrand = typeof brands.$inferInsert;
 export type ProductStatus = (typeof productStatusEnum.enumValues)[number];
 export type ProductType = (typeof productTypeEnum.enumValues)[number];

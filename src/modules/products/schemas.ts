@@ -19,8 +19,10 @@ export const createProductSchema = z.object({
   slug: slugField,
   priceCents: z.number().int().positive(),
   status: productStatusEnum.default("draft").optional(),
+  type: z.enum(["simple", "variable", "bundle"]).default("simple").optional(),
   description: z.string().optional(),
   categoryId: z.string().uuid().optional(),
+  brandId: z.string().uuid().optional(),
   compareAtPriceCents: z.number().int().positive().optional(),
   taxable: z.boolean().optional(),
   trackInventory: z.boolean().optional(),
@@ -29,6 +31,9 @@ export const createProductSchema = z.object({
   sku: z.string().max(100).optional(),
   barcode: z.string().max(100).optional(),
   images: z.array(imageSchema).optional(),
+  seoTitle: z.string().max(255).optional(),
+  seoDescription: z.string().max(500).optional(),
+  seoKeywords: z.string().optional(),
 });
 
 export const updateProductSchema = createProductSchema.partial().extend({
