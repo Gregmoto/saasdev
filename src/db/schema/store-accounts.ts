@@ -72,6 +72,11 @@ export const storeAccounts = pgTable(
     approvedAt: timestamp("approved_at", { withTimezone: true }),
     rejectionReason: text("rejection_reason"),
 
+    // Demo accounts are read-only for public visitors. The API preHandler
+    // blocks all write operations (POST/PUT/PATCH/DELETE) unless the caller
+    // is a platform super-admin (is_platform_admin = true in auth_users).
+    isDemo: boolean("is_demo").notNull().default(false),
+
     // Arbitrary key-value store configuration (starter defaults written on provision)
     settings: jsonb("settings").notNull().default(sql`'{}'::jsonb`),
 
@@ -82,6 +87,7 @@ export const storeAccounts = pgTable(
     slugIdx: uniqueIndex("store_accounts_slug_idx").on(t.slug),
     activeIdx: index("store_accounts_active_idx").on(t.isActive),
     statusIdx: index("store_accounts_status_idx").on(t.status),
+    isDemoIdx: index("store_accounts_is_demo_idx").on(t.isDemo),
   }),
 );
 

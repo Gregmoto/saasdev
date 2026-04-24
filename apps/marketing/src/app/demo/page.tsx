@@ -80,12 +80,12 @@ export default function DemoPage() {
                 <h2 className="text-xl font-bold text-stone-900 mb-1">Demo QA-checklista</h2>
                 <p className="text-stone-500 text-sm">Verifiera routing, scoping och skrivskydd i alla demos.</p>
               </div>
-              <Link
-                href="/demo-qa"
+              <a
+                href="/admin/demo-qa"
                 className="flex-shrink-0 text-xs font-medium text-stone-500 hover:text-stone-900 border border-stone-200 hover:border-stone-300 px-3 py-1.5 rounded-lg transition-colors"
               >
-                Intern QA-checklista (kräver inloggning) →
-              </Link>
+                Intern QA-checklista (admin) →
+              </a>
             </div>
             <div className="space-y-3">
               {[

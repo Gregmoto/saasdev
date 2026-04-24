@@ -58,6 +58,7 @@ import mediaModule from "./modules/media/index.js";
 import launchModule from "./modules/launch/index.js";
 import cacheModule from "./modules/cache/index.js";
 import securityModule from "./modules/security/index.js";
+import demoModule from "./modules/demo/index.js";
 
 export function buildApp() {
   const loggerOpts: FastifyServerOptions["logger"] =
@@ -132,6 +133,8 @@ export function buildApp() {
   app.register(launchModule);
   app.register(cacheModule);
   app.register(securityModule);
+  // Demo read-only guard — must be registered after session/auth plugins.
+  app.register(demoModule);
 
   app.setErrorHandler((error, _request, reply) => {
     if (error.name === "ZodError") {

@@ -39,20 +39,40 @@ export default async function DemoDetailPage({
   return (
     <>
       <Nav />
-      {/* Demo banner */}
-      <div className="bg-amber-50 border-b border-amber-200 px-6 py-2.5 text-center">
-        <span className="text-amber-800 text-sm font-medium">
-          👁️ Skrivskyddad demo — all data är fiktiv och återställs automatiskt varje natt
-        </span>
+      {/* Demo banner — always visible, sticky so it persists on scroll */}
+      <div className="sticky top-0 z-50 bg-amber-400 border-b border-amber-500 px-6 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <span className="text-amber-900 text-sm font-semibold flex items-center gap-2">
+            <span className="text-base">👁️</span>
+            <span>
+              Detta är en <strong>skrivskyddad demo</strong> — all data är fiktiv och återställs automatiskt varje natt.
+              Inga riktiga köp eller ändringar kan göras.
+            </span>
+          </span>
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <Link
+              href="/demo"
+              className="text-xs font-medium text-amber-900 hover:text-amber-950 underline underline-offset-2"
+            >
+              ← Alla demos
+            </Link>
+            <Link
+              href="/"
+              className="text-xs font-semibold bg-amber-900 hover:bg-amber-950 text-amber-50 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              Tillbaka till ShopMan.se
+            </Link>
+          </div>
+        </div>
       </div>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-6 flex items-center gap-3">
-          <Link href="/demo" className="text-sm text-gray-400 hover:text-gray-600">
+          <Link href="/demo" className="text-sm text-stone-400 hover:text-stone-600 transition-colors">
             ← Alla demos
           </Link>
-          <span className="text-gray-200">/</span>
-          <span className="text-sm text-gray-700 font-medium">{demo.title}</span>
+          <span className="text-stone-200">/</span>
+          <span className="text-sm text-stone-700 font-medium">{demo.title}</span>
         </div>
 
         <div className="mb-8 flex items-start gap-4">
