@@ -1,0 +1,17 @@
+# Railway Nixpacks config for the Fastify API
+# This file is used when Railway auto-detects the service root as the repo root.
+
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[phases.install]
+cmds = ["corepack enable && corepack prepare pnpm@latest --activate", "pnpm install --frozen-lockfile"]
+
+[phases.build]
+cmds = ["pnpm --filter @saas-shop/api build"]
+
+[start]
+cmd = "node dist/server.js"
+
+[variables]
+NODE_ENV = "production"

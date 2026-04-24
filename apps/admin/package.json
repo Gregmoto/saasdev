@@ -1,0 +1,30 @@
+{
+  "name": "@saas-shop/admin",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3001",
+    "build": "next build",
+    "start": "next start --port 3001",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^15.3.1",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "swr": "^2.2.5",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.5.4",
+    "@saas-shop/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.4.5",
+    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "@tailwindcss/forms": "^0.5.7"
+  }
+}
