@@ -18,7 +18,7 @@ export interface SignupOpts {
   storeName: string;
   storeSlug: string;
   mode?: "WEBSHOP" | "MULTISHOP" | "MARKETPLACE" | "RESELLER_PANEL";
-  subdomain?: string;
+  subdomain?: string | undefined;
 }
 
 export interface SignupResult {
