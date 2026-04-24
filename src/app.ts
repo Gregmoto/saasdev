@@ -57,6 +57,7 @@ import seoModule from "./modules/seo/index.js";
 import mediaModule from "./modules/media/index.js";
 import launchModule from "./modules/launch/index.js";
 import cacheModule from "./modules/cache/index.js";
+import securityModule from "./modules/security/index.js";
 
 export function buildApp() {
   const loggerOpts: FastifyServerOptions["logger"] =
@@ -130,6 +131,7 @@ export function buildApp() {
   app.register(mediaModule);
   app.register(launchModule);
   app.register(cacheModule);
+  app.register(securityModule);
 
   app.setErrorHandler((error, _request, reply) => {
     if (error.name === "ZodError") {
