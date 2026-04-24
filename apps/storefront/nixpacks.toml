@@ -1,8 +1,12 @@
 [phases.install]
-cmds = ["npm install -g pnpm && pnpm install --frozen-lockfile"]
+cmds = []
 
 [phases.build]
-cmds = ["pnpm --filter @saas-shop/storefront build"]
+cmds = [
+  "npm install -g pnpm@9",
+  "pnpm install --frozen-lockfile",
+  "pnpm --filter @saas-shop/storefront build"
+]
 
 [start]
 cmd = "node apps/storefront/.next/standalone/apps/storefront/server.js"

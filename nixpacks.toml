@@ -1,11 +1,15 @@
-# Railway Nixpacks/Railpack config — Fastify API (monorepo root)
-# Railway auto-detects pnpm from pnpm-lock.yaml
+# Railway Railpack config — Fastify API
+# All steps in build phase (runs after source copy)
 
 [phases.install]
-cmds = ["npm install -g pnpm && pnpm install --frozen-lockfile"]
+cmds = []
 
 [phases.build]
-cmds = ["pnpm --filter @saas-shop/api build"]
+cmds = [
+  "npm install -g pnpm@9",
+  "pnpm install --frozen-lockfile",
+  "pnpm --filter @saas-shop/api build"
+]
 
 [start]
 cmd = "node dist/server.js"
