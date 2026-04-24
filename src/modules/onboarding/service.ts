@@ -17,12 +17,15 @@ export interface SignupOpts {
   password: string;
   storeName: string;
   storeSlug: string;
+  mode?: "WEBSHOP" | "MULTISHOP" | "MARKETPLACE" | "RESELLER_PANEL";
+  subdomain?: string;
 }
 
 export interface SignupResult {
   userId: string;
   storeAccountId: string;
-  status: "pending";
+  status: "pending" | "active";
+  autoActivated: boolean;
 }
 
 /**
@@ -33,6 +36,7 @@ export interface SignupResult {
  */
 export async function signupStoreAccount(db: Db, opts: SignupOpts): Promise<SignupResult> {
   const passwordHash = await hashPassword(opts.password);
+  const autoActivate = config.SIGNUP_AUTO_ACTIVATE;
 
   const result = await db.transaction(async (tx) => {
     const [store] = await tx
@@ -40,10 +44,10 @@ export async function signupStoreAccount(db: Db, opts: SignupOpts): Promise<Sign
       .values({
         slug: opts.storeSlug,
         name: opts.storeName,
-        mode: "WEBSHOP",
+        mode: opts.mode ?? "WEBSHOP",
         plan: "starter",
-        status: "pending",
-        isActive: false, // blocked until approved
+        status: autoActivate ? "active" : "pending",
+        isActive: autoActivate, // active immediately if auto-activate is on
         settings: {},
       })
       .returning({ id: storeAccounts.id });
@@ -77,30 +81,48 @@ export async function signupStoreAccount(db: Db, opts: SignupOpts): Promise<Sign
       storeAccountId: store.id,
       userId,
       role: "store_admin",
-      isActive: false, // membership inactive until account is approved
+      isActive: autoActivate, // active immediately if auto-activate is on
       acceptedAt: new Date(),
     });
 
     return { userId, storeAccountId: store.id };
   });
 
-  // Notify Platform Super Admins that a new signup needs review.
-  await notifyPlatformAdmins(db, opts.storeName, opts.storeSlug, opts.email);
+  if (autoActivate) {
+    // Notify the user that their store is ready.
+    await sendEmail({
+      to: opts.email,
+      subject: "Your store account is ready!",
+      html: `
+        <p>Welcome! Your store account <strong>${opts.storeSlug}</strong>
+        has been created and is ready to use.</p>
+        <p>You can log in and start setting up your store right away.</p>
+      `,
+      text: `Your store account ${opts.storeSlug} is ready. Log in to get started.`,
+    });
+  } else {
+    // Notify Platform Super Admins that a new signup needs review.
+    await notifyPlatformAdmins(db, opts.storeName, opts.storeSlug, opts.email);
 
-  // Acknowledge signup to the applicant.
-  await sendEmail({
-    to: opts.email,
-    subject: "Your store account application is under review",
-    html: `
-      <p>Thank you for signing up! Your store account <strong>${opts.storeSlug}</strong>
-      has been created and is currently pending approval.</p>
-      <p>You will receive an email when your account has been reviewed. This usually takes
-      1–2 business days.</p>
-    `,
-    text: `Your store account ${opts.storeSlug} is pending approval. We'll email you when it's reviewed.`,
-  });
+    // Acknowledge signup to the applicant.
+    await sendEmail({
+      to: opts.email,
+      subject: "Your store account application is under review",
+      html: `
+        <p>Thank you for signing up! Your store account <strong>${opts.storeSlug}</strong>
+        has been created and is currently pending approval.</p>
+        <p>You will receive an email when your account has been reviewed. This usually takes
+        1–2 business days.</p>
+      `,
+      text: `Your store account ${opts.storeSlug} is pending approval. We'll email you when it's reviewed.`,
+    });
+  }
 
-  return { ...result, status: "pending" };
+  return {
+    ...result,
+    status: autoActivate ? "active" : "pending",
+    autoActivated: autoActivate,
+  };
 }
 
 // ── Status check ──────────────────────────────────────────────────────────────

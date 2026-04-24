@@ -42,6 +42,10 @@ const envSchema = z.object({
   // Must be exactly 32 bytes, base64-encoded.
   // Generate: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
   TOTP_ENCRYPTION_KEY: z.string().min(1).default("CHANGE_ME_generate_32_bytes_base64=="),
+
+  // When true, new signups are immediately activated without Platform Admin approval.
+  // Useful for development and self-hosted deployments.
+  SIGNUP_AUTO_ACTIVATE: z.string().default("false").transform(v => v === "true"),
 });
 
 const parsed = envSchema.safeParse(process.env);
