@@ -11,19 +11,20 @@ const PLANS = [
   {
     id: "starter",
     name: "Starter",
-    price: 599,
-    priceYearly: 499, // per month, billed yearly
+    price: 299,
+    priceYearly: 199, // per month, billed yearly
     tagline: "Perfekt för enskilda butiker som just kommit igång.",
     highlight: false,
     badge: null,
     limits: {
-      products: "500",
+      products: "Obegränsat",
       markets: "1",
       api_calls: "10 000/mån",
       warehouses: "1",
       users: "3",
     },
     features: [
+      "Obegränsat antal produkter",
       "Webshop",
       "Grundläggande SEO",
       "Klarna-betalningar",
@@ -46,13 +47,13 @@ const PLANS = [
   {
     id: "growth",
     name: "Growth",
-    price: 1499,
-    priceYearly: 1249,
+    price: 1199,
+    priceYearly: 899, // per month, billed yearly
     tagline: "För växande handlare med flera kanaler och marknader.",
     highlight: true,
     badge: "Mest populär",
     limits: {
-      products: "5 000",
+      products: "Obegränsat",
       markets: "5",
       api_calls: "100 000/mån",
       warehouses: "3",
@@ -60,6 +61,7 @@ const PLANS = [
     },
     features: [
       "Allt i Starter",
+      "Obegränsat antal produkter",
       "Multishop",
       "Fortnox-integration",
       "API-åtkomst",
@@ -71,7 +73,6 @@ const PLANS = [
     missing: [
       "Marknadsplats",
       "B2B-prissättning",
-      "Obegränsat antal produkter",
       "Dedikerad support",
     ],
     cta: "Starta gratis",
@@ -111,7 +112,7 @@ const PLANS = [
 // ─── Feature comparison table ─────────────────────────────────────────────────
 
 const FEATURE_ROWS = [
-  { label: "Produkter", starter: "500", growth: "5 000", enterprise: "Obegränsat", group: "Begränsningar" },
+  { label: "Produkter", starter: "Obegränsat", growth: "Obegränsat", enterprise: "Obegränsat", group: "Begränsningar" },
   { label: "Marknader / butiker", starter: "1", growth: "5", enterprise: "Obegränsat", group: "Begränsningar" },
   { label: "API-anrop/mån", starter: "10 000", growth: "100 000", enterprise: "Obegränsat", group: "Begränsningar" },
   { label: "Lagerplatser", starter: "1", growth: "3", enterprise: "Obegränsat", group: "Begränsningar" },

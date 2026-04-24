@@ -52,7 +52,9 @@ export const plans = pgTable(
     description: text("description"),
 
     // Pricing — null means custom/contact-sales.
+    // monthly = billed monthly; annual = per-month price when billed yearly (lower).
     monthlyPriceCents: integer("monthly_price_cents"),
+    annualPriceCents: integer("annual_price_cents"),
 
     // Capability gates for this plan tier.
     limits: jsonb("limits")
