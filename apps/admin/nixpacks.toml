@@ -1,5 +1,6 @@
-# Railway Nixpacks config for the Admin Next.js app
-
+# Railway Nixpacks config — Admin Next.js app
+# Railway root directory for this service should be set to: apps/admin
+# But since we upload from monorepo root, we build from here.
 [phases.setup]
 nixPkgs = ["nodejs_20"]
 
@@ -13,7 +14,7 @@ cmds = [
 cmds = ["pnpm --filter @saas-shop/admin build"]
 
 [start]
-cmd = "node apps/admin/server.js"
+cmd = "node apps/admin/.next/standalone/apps/admin/server.js"
 
 [variables]
 NODE_ENV = "production"

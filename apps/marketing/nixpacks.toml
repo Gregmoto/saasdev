@@ -1,5 +1,4 @@
-# Railway Nixpacks config for the Marketing Next.js app
-
+# Railway Nixpacks config — Marketing Next.js app
 [phases.setup]
 nixPkgs = ["nodejs_20"]
 
@@ -13,7 +12,7 @@ cmds = [
 cmds = ["pnpm --filter @saas-shop/marketing build"]
 
 [start]
-cmd = "node apps/marketing/server.js"
+cmd = "node apps/marketing/.next/standalone/apps/marketing/server.js"
 
 [variables]
 NODE_ENV = "production"

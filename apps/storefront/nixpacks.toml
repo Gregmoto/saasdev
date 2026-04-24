@@ -1,5 +1,4 @@
-# Railway Nixpacks config for the Storefront Next.js app
-
+# Railway Nixpacks config — Storefront Next.js app
 [phases.setup]
 nixPkgs = ["nodejs_20"]
 
@@ -13,7 +12,7 @@ cmds = [
 cmds = ["pnpm --filter @saas-shop/storefront build"]
 
 [start]
-cmd = "node apps/storefront/server.js"
+cmd = "node apps/storefront/.next/standalone/apps/storefront/server.js"
 
 [variables]
 NODE_ENV = "production"
