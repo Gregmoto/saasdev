@@ -16,6 +16,10 @@ const NAV = [
   { label: "Reviews", href: "/reviews", icon: "⭐" },
   { label: "FAQ", href: "/faq", icon: "❓" },
   { label: "Demo QA", href: "/demo-qa", icon: "✅" },
+  { label: "Jobb", href: "/jobs", icon: "⚙️" },
+  { label: "SEO", href: "/seo", icon: "🔍" },
+  { label: "Media", href: "/media", icon: "🖼️" },
+  { label: "Driftsättning", href: "/launch", icon: "🚀" },
   { label: "Settings", href: "/settings", icon: "⚙️" },
 ];
 

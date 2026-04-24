@@ -35,3 +35,6 @@ export * from "./marketing-cms.js";
 export * from "./leads.js";
 export * from "./status.js";
 export * from "./store-faqs.js";
+export * from "./jobs.js";
+export * from "./seo.js";
+export * from "./media.js";
