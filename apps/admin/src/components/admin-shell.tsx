@@ -20,9 +20,13 @@ const NAV = [
 
 export function AdminShell({
   user,
+  storeName,
+  storeSlug,
   children,
 }: {
   user: Me;
+  storeName?: string;
+  storeSlug?: string;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -42,13 +46,10 @@ export function AdminShell({
         <div className="px-4 py-5 border-b border-zinc-800">
           <div className="text-white font-bold text-lg">⚡ SaaS Shop</div>
           <div className="mt-3 text-xs text-zinc-400 uppercase tracking-wider">Store</div>
-          <div className="mt-1 text-white text-sm font-medium">My Store</div>
-          <div className="mt-2 flex items-center gap-2">
-            <span className="text-xs text-zinc-400">Shop:</span>
-            <span className="text-xs text-zinc-200 bg-zinc-700 px-2 py-0.5 rounded">
-              All shops
-            </span>
-          </div>
+          <div className="mt-1 text-white text-sm font-medium">{storeName ?? "My Store"}</div>
+          {storeSlug && (
+            <div className="mt-1 text-xs text-zinc-500">{storeSlug}</div>
+          )}
         </div>
 
         {/* Nav */}
