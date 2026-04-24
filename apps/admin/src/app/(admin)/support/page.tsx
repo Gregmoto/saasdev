@@ -1,9 +1,9 @@
 "use client";
 import useSWR from "swr";
+import { fetcher } from "@/lib/fetcher";
 import { Table, Thead, Th, Tr, Td, Badge, Spinner, Alert, Card } from "@saas-shop/ui";
 
-const fetcher = (url: string) =>
-  fetch(url, { credentials: "include" }).then((r) => r.json());
+
 
 export default function SupportPage() {
   const { data, error, isLoading } = useSWR("/api/support/tickets", fetcher);

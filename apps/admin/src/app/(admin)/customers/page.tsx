@@ -1,9 +1,9 @@
 "use client";
 import useSWR from "swr";
+import { fetcher } from "@/lib/fetcher";
 import { Table, Thead, Th, Tr, Td, Spinner, Alert, Card } from "@saas-shop/ui";
 
-const fetcher = (url: string) =>
-  fetch(url, { credentials: "include" }).then((r) => r.json());
+
 
 export default function CustomersPage() {
   const { data, error, isLoading } = useSWR("/api/customers", fetcher);

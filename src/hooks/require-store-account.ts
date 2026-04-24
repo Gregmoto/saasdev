@@ -67,7 +67,22 @@ export async function requireStoreAccountContext(
   }
 
   // ── 2–5. Resolve store account (and optionally shop) from hostname ─────────
-  const resolved = await resolveFromHostname(request);
+  let resolved = await resolveFromHostname(request);
+
+  // ── 2b. Fallback: user's home store account ────────────────────────────────
+  // When the request arrives via a generic hostname (e.g. a Railway deploy URL
+  // or localhost) that doesn't match any store domain/subdomain, fall back to
+  // the authenticated user's homeStoreAccountId.  This lets the admin panel
+  // work at a generic URL without requiring per-store subdomains.
+  if (!resolved && request.currentUser.homeStoreAccountId) {
+    const [account] = await db
+      .select()
+      .from(storeAccounts)
+      .where(eq(storeAccounts.id, request.currentUser.homeStoreAccountId))
+      .limit(1);
+    if (account) resolved = { account, shop: null };
+  }
+
   if (!resolved) {
     return reply.status(404).send({
       statusCode: 404,
