@@ -1,5 +1,5 @@
 # Railway Railpack config — Fastify API
-# All steps in build phase (runs after source copy)
+# Use tsx to run TypeScript directly (avoids dist layer issue)
 
 [phases.install]
 cmds = []
@@ -7,12 +7,11 @@ cmds = []
 [phases.build]
 cmds = [
   "npm install -g pnpm@9",
-  "pnpm install --frozen-lockfile",
-  "pnpm --filter @saas-shop/api build"
+  "pnpm install --frozen-lockfile"
 ]
 
 [start]
-cmd = "node dist/server.js"
+cmd = "node --import tsx/esm src/server.ts"
 
 [variables]
 NODE_ENV = "production"
