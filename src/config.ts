@@ -32,6 +32,9 @@ const envSchema = z.object({
 
   SENTRY_DSN: z.string().default(""),
 
+  // Lead capture webhook (CRM / email tool)
+  LEAD_WEBHOOK_URL: z.string().default(""),
+
   // AES-256-GCM key for encrypting TOTP secrets at rest.
   // Must be exactly 32 bytes, base64-encoded.
   // Generate: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"

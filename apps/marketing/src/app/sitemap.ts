@@ -114,6 +114,48 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as ChangeFrequency,
       priority: 0.8,
     },
+    {
+      url: `${SITE_URL}/resources`,
+      lastModified: now,
+      changeFrequency: "monthly" as ChangeFrequency,
+      priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/status`,
+      lastModified: now,
+      changeFrequency: "hourly" as ChangeFrequency,
+      priority: 0.6,
+    },
+    {
+      url: `${SITE_URL}/book-demo`,
+      lastModified: now,
+      changeFrequency: "monthly" as ChangeFrequency,
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/trial`,
+      lastModified: now,
+      changeFrequency: "monthly" as ChangeFrequency,
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/demo/webshop`,
+      lastModified: now,
+      changeFrequency: "monthly" as ChangeFrequency,
+      priority: 0.7,
+    },
+    {
+      url: `${SITE_URL}/demo/multishop`,
+      lastModified: now,
+      changeFrequency: "monthly" as ChangeFrequency,
+      priority: 0.7,
+    },
+    {
+      url: `${SITE_URL}/demo/marketplace`,
+      lastModified: now,
+      changeFrequency: "monthly" as ChangeFrequency,
+      priority: 0.7,
+    },
   ];
 
   const [blogPosts, changelogEntries, featurePages, caseStudies, integrations, newsPosts] =

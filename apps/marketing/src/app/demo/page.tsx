@@ -21,7 +21,7 @@ const DEMOS = [
     slug: "marketplace",
     title: "Marknadsplats",
     desc: "Flera oberoende butikskonton med egna produkter, ordrar och fakturering.",
-    tags: ["Multi-tenant", "Isolerad fakturering", "Leverantörsflöden"],
+    tags: ["Fristående butiker", "Isolerad fakturering", "Leverantörsflöden"],
     icon: "🌐",
   },
 ];

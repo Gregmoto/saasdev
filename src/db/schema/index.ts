@@ -32,3 +32,5 @@ export * from "./marketplace.js";
 export * from "./affiliates.js";
 export * from "./b2b.js";
 export * from "./marketing-cms.js";
+export * from "./leads.js";
+export * from "./status.js";

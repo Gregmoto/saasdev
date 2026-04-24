@@ -7,8 +7,8 @@ const LINKS = [
   { label: "Funktioner", href: "/features" },
   { label: "Integrationer", href: "/integrations" },
   { label: "Priser", href: "/pricing" },
+  { label: "Resurser", href: "/resources" },
   { label: "Nyheter", href: "/news" },
-  { label: "Blogg", href: "/blog" },
   { label: "Demo", href: "/demo" },
 ];
 
@@ -55,10 +55,16 @@ export function Nav() {
             Logga in
           </Link>
           <Link
-            href="/contact"
+            href="/book-demo"
+            className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors px-3 py-1.5"
+          >
+            Boka demo
+          </Link>
+          <Link
+            href="/trial"
             className="text-sm font-medium bg-zinc-900 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg transition-colors"
           >
-            Kom igång
+            Testa gratis
           </Link>
         </div>
 
@@ -90,7 +96,8 @@ export function Nav() {
           ))}
           <div className="pt-3 mt-3 border-t border-zinc-100 flex flex-col gap-2">
             <Link href="https://admin-production-42ec.up.railway.app/login" className="text-sm text-zinc-500 px-3 py-2">Logga in</Link>
-            <Link href="/contact" className="text-sm font-medium bg-zinc-900 text-white px-4 py-2 rounded-lg text-center">Kom igång</Link>
+            <Link href="/book-demo" className="text-sm text-zinc-600 px-3 py-2">Boka demo</Link>
+            <Link href="/trial" className="text-sm font-medium bg-zinc-900 text-white px-4 py-2 rounded-lg text-center">Testa gratis</Link>
           </div>
         </div>
       )}

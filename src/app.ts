@@ -48,6 +48,8 @@ import marketplaceModule from "./modules/marketplace/index.js";
 import affiliatesModule from "./modules/affiliates/index.js";
 import b2bModule from "./modules/b2b/index.js";
 import marketingCmsModule from "./modules/marketing-cms/index.js";
+import leadsModule from "./modules/leads/index.js";
+import statusModule from "./modules/status/index.js";
 
 export function buildApp() {
   const loggerOpts: FastifyServerOptions["logger"] =
@@ -112,6 +114,8 @@ export function buildApp() {
   app.register(affiliatesModule);
   app.register(b2bModule);
   app.register(marketingCmsModule);
+  app.register(leadsModule);
+  app.register(statusModule);
 
   app.setErrorHandler((error, _request, reply) => {
     if (error.name === "ZodError") {

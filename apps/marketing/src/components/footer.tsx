@@ -14,24 +14,23 @@ const COLS = [
   {
     title: "Resurser",
     links: [
-      ["Dokumentation", "/docs"],
+      ["Guider & Resurser", "/resources"],
       ["Nyheter", "/news"],
       ["Blogg", "/blog"],
-      ["Kundcase", "/cases"],
+      ["Versionshistorik", "/changelog"],
+      ["Systemstatus", "/status"],
       ["RSS — Nyheter", "/news/rss"],
-      ["RSS — Changelog", "/changelog/rss"],
     ],
   },
   {
-    title: "Företag",
+    title: "Kom igång",
     links: [
-      ["Om oss", "/about"],
+      ["Boka demo", "/book-demo"],
+      ["Starta gratis test", "/trial"],
       ["Kontakt", "/contact"],
       ["Alternativ till Shopify", "/alternatives/shopify"],
       ["Alternativ till WooCommerce", "/alternatives/woocommerce"],
       ["Alternativ till PrestaShop", "/alternatives/prestashop"],
-      ["Integritetspolicy", "/privacy"],
-      ["Villkor", "/terms"],
     ],
   },
 ];
