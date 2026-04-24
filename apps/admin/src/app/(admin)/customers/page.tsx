@@ -39,9 +39,7 @@ export default function CustomersPage() {
               {rows.map((row: any) => (
                 <Tr key={row.id}>
                   <Td>
-                    {row.name ??
-                      [row.firstName, row.lastName].filter(Boolean).join(" ") ||
-                      "—"}
+                    {(row.name ?? [row.firstName, row.lastName].filter(Boolean).join(" ")) || "—"}
                   </Td>
                   <Td>{row.email ?? "—"}</Td>
                   <Td>{row.ordersCount ?? row.orders ?? "—"}</Td>

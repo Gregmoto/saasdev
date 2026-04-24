@@ -8,8 +8,8 @@ export function Thead({ children }: { children: React.ReactNode }) {
 export function Th({ className, children }: { className?: string; children?: React.ReactNode }) {
   return <th className={cn("px-4 py-3 font-medium", className)}>{children}</th>;
 }
-export function Td({ className, children }: { className?: string; children?: React.ReactNode }) {
-  return <td className={cn("px-4 py-4 text-zinc-700", className)}>{children}</td>;
+export function Td({ className, children, colSpan }: { className?: string; children?: React.ReactNode; colSpan?: number }) {
+  return <td colSpan={colSpan} className={cn("px-4 py-4 text-zinc-700", className)}>{children}</td>;
 }
 export function Tr({ className, children }: { className?: string; children: React.ReactNode }) {
   return <tr className={cn("border-b border-zinc-100 hover:bg-zinc-50/50 transition-colors", className)}>{children}</tr>;
