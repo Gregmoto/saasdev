@@ -3,6 +3,7 @@ import { requireAuth } from "../../hooks/require-auth.js";
 import { resolveStoreAccountIdFromRequest } from "../../hooks/require-store-account.js";
 import * as AuthService from "./service.js";
 import * as SecurityService from "../security/service.js";
+import { isPlatformSuperAdmin } from "../rbac/service.js";
 import {
   loginSchema,
   registerSchema,
@@ -391,12 +392,14 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
   // ── GET /auth/me ──────────────────────────────────────────────────────────
   app.get("/auth/me", { preHandler: [requireAuth] }, async (request, reply) => {
     const { id, email, totpEnabled, lastLoginAt } = request.currentUser;
+    const isPlatformAdmin = await isPlatformSuperAdmin(app.db, id);
     return reply.send({
       id,
       email,
       totpEnabled,
       lastLoginAt,
       isImpersonating: request.isImpersonating,
+      isPlatformAdmin,
     });
   });
 

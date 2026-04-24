@@ -4,6 +4,7 @@ export interface Me {
   totpEnabled: boolean;
   lastLoginAt: string | null;
   isImpersonating: boolean;
+  isPlatformAdmin: boolean;
 }
 
 // Server-side: call from Server Components and middleware

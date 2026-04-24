@@ -27,7 +27,20 @@ export default function LoginPage() {
         }),
       });
       if (res.ok) {
-        router.push("/dashboard");
+        // Use portal API to route to the correct portal based on role
+        try {
+          const portalRes = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL ?? ""}/auth/portal`,
+            { credentials: "include", cache: "no-store" },
+          );
+          if (portalRes.ok) {
+            const { redirect: dest } = await portalRes.json() as { redirect: string };
+            router.push(dest);
+            router.refresh();
+            return;
+          }
+        } catch { /* fallthrough */ }
+        router.push("/admin/dashboard");
         router.refresh();
       } else {
         setError("Invalid email or password");
