@@ -24,6 +24,8 @@ import {
   cmsRoadmapItemUpdateSchema,
   cmsDocsArticleSchema,
   cmsDocsArticleUpdateSchema,
+  cmsLegalVersionSchema,
+  cmsLegalVersionUpdateSchema,
 } from "./schemas.js";
 
 const idParam = z.object({ id: z.string().uuid() });
@@ -406,6 +408,10 @@ export async function marketingCmsRoutes(app: FastifyInstance): Promise<void> {
       if (body.body !== undefined) data.body = body.body;
       if (body.tags !== undefined) data.tags = body.tags;
       if (body.category !== undefined) data.category = body.category;
+      if (body.versionLabel !== undefined) data.versionLabel = body.versionLabel;
+      if (body.highlights !== undefined) data.highlights = body.highlights as Array<{text: string; href?: string}>;
+      if (body.fixes !== undefined) data.fixes = body.fixes as Array<{text: string; href?: string}>;
+      if (body.docsLinks !== undefined) data.docsLinks = body.docsLinks as Array<{text: string; href: string}>;
       if (body.seoTitle !== undefined) data.seoTitle = body.seoTitle;
       if (body.seoDescription !== undefined) data.seoDescription = body.seoDescription;
       const result = await CmsService.createCmsChangelog(app.db, data);
@@ -429,6 +435,10 @@ export async function marketingCmsRoutes(app: FastifyInstance): Promise<void> {
       if (body.body !== undefined) data.body = body.body;
       if (body.tags !== undefined) data.tags = body.tags;
       if (body.category !== undefined) data.category = body.category;
+      if (body.versionLabel !== undefined) data.versionLabel = body.versionLabel;
+      if (body.highlights !== undefined) data.highlights = body.highlights as Array<{text: string; href?: string}>;
+      if (body.fixes !== undefined) data.fixes = body.fixes as Array<{text: string; href?: string}>;
+      if (body.docsLinks !== undefined) data.docsLinks = body.docsLinks as Array<{text: string; href: string}>;
       if (body.seoTitle !== undefined) data.seoTitle = body.seoTitle;
       if (body.seoDescription !== undefined) data.seoDescription = body.seoDescription;
       const result = await CmsService.updateCmsChangelog(app.db, id, data);
@@ -771,6 +781,8 @@ export async function marketingCmsRoutes(app: FastifyInstance): Promise<void> {
       language?: string;
       category?: string;
       quarter?: string;
+      itemStatus?: string;
+      tags?: string[];
       page: number;
       limit: number;
     } = { status: "published", page: query.page, limit: query.limit };
@@ -779,6 +791,10 @@ export async function marketingCmsRoutes(app: FastifyInstance): Promise<void> {
     if (typeof categoryRaw === "string" && categoryRaw) opts.category = categoryRaw;
     const quarterRaw = raw["quarter"];
     if (typeof quarterRaw === "string" && quarterRaw) opts.quarter = quarterRaw;
+    const itemStatusRaw = raw["item_status"];
+    if (typeof itemStatusRaw === "string" && itemStatusRaw) opts.itemStatus = itemStatusRaw;
+    const tagsRaw = raw["tags"];
+    if (typeof tagsRaw === "string" && tagsRaw) opts.tags = tagsRaw.split(",").map(t => t.trim()).filter(Boolean);
     const result = await CmsService.listCmsRoadmapItems(app.db, opts);
     return reply.send(result);
   });
@@ -845,6 +861,8 @@ export async function marketingCmsRoutes(app: FastifyInstance): Promise<void> {
       if (body.body !== undefined) data.body = body.body;
       if (body.excerpt !== undefined) data.excerpt = body.excerpt;
       if (body.votes !== undefined) data.votes = body.votes;
+      if (body.itemStatus !== undefined) data.itemStatus = body.itemStatus;
+      if (body.tags !== undefined) data.tags = body.tags;
       if (body.seoTitle !== undefined) data.seoTitle = body.seoTitle;
       if (body.seoDescription !== undefined) data.seoDescription = body.seoDescription;
       if (body.ogImageUrl !== undefined) data.ogImageUrl = body.ogImageUrl;
@@ -871,6 +889,8 @@ export async function marketingCmsRoutes(app: FastifyInstance): Promise<void> {
       if (body.body !== undefined) data.body = body.body;
       if (body.excerpt !== undefined) data.excerpt = body.excerpt;
       if (body.votes !== undefined) data.votes = body.votes;
+      if (body.itemStatus !== undefined) data.itemStatus = body.itemStatus;
+      if (body.tags !== undefined) data.tags = body.tags;
       if (body.seoTitle !== undefined) data.seoTitle = body.seoTitle;
       if (body.seoDescription !== undefined) data.seoDescription = body.seoDescription;
       if (body.ogImageUrl !== undefined) data.ogImageUrl = body.ogImageUrl;
@@ -953,6 +973,110 @@ export async function marketingCmsRoutes(app: FastifyInstance): Promise<void> {
       const { id } = idParam.parse(request.params);
       await CmsService.deleteCmsDocsArticle(app.db, id);
       return reply.status(204).send();
+    },
+  );
+
+  // ── Public: Legal versions ────────────────────────────────────────────────────
+
+  app.get("/api/cms/legal/:pageType", async (request, reply) => {
+    const { pageType } = z.object({
+      pageType: z.enum(["privacy", "terms", "cookies", "dpa"]),
+    }).parse(request.params);
+    const { lang } = langQuery.parse(request.query);
+
+    const [latest, allVersions] = await Promise.all([
+      CmsService.getLatestPublishedLegalVersion(app.db, pageType, lang),
+      CmsService.listCmsLegalVersions(app.db, pageType, lang),
+    ]);
+
+    if (!latest) {
+      return reply.status(404).send({ ...NOT_FOUND, message: "Legal page not found" });
+    }
+
+    return reply.send({ current: latest, versions: allVersions });
+  });
+
+  app.get("/api/cms/legal/:pageType/versions", async (request, reply) => {
+    const { pageType } = z.object({
+      pageType: z.enum(["privacy", "terms", "cookies", "dpa"]),
+    }).parse(request.params);
+    const { lang } = langQuery.parse(request.query);
+
+    const versions = await CmsService.listCmsLegalVersions(app.db, pageType, lang);
+    return reply.send(
+      versions.map(v => ({
+        id: v.id,
+        versionNumber: v.versionNumber,
+        versionLabel: v.versionLabel,
+        effectiveDate: v.effectiveDate,
+      })),
+    );
+  });
+
+  app.get("/api/cms/legal/:pageType/:versionId", async (request, reply) => {
+    const { pageType, versionId } = z.object({
+      pageType: z.enum(["privacy", "terms", "cookies", "dpa"]),
+      versionId: z.string().uuid(),
+    }).parse(request.params);
+
+    const version = await CmsService.getLegalVersionById(app.db, versionId);
+    if (!version || version.pageType !== pageType || version.status !== "published") {
+      return reply.status(404).send({ ...NOT_FOUND, message: "Legal version not found" });
+    }
+    return reply.send(version);
+  });
+
+  // ── Admin: Legal versions ─────────────────────────────────────────────────────
+
+  app.post(
+    "/api/platform/cms/legal",
+    { preHandler: [requireAuth, requirePlatformAdmin] },
+    async (request, reply) => {
+      const body = cmsLegalVersionSchema.parse(request.body);
+      const data: Parameters<typeof CmsService.createCmsLegalVersion>[1] = {
+        pageType: body.pageType,
+        versionNumber: body.versionNumber,
+        effectiveDate: body.effectiveDate,
+      };
+      if (body.language !== undefined) data.language = body.language;
+      if (body.versionLabel !== undefined) data.versionLabel = body.versionLabel;
+      if (body.status !== undefined) data.status = body.status;
+      if (body.body !== undefined) data.body = body.body;
+      if (body.summaryOfChanges !== undefined) data.summaryOfChanges = body.summaryOfChanges;
+      const result = await CmsService.createCmsLegalVersion(app.db, data);
+      return reply.status(201).send(result);
+    },
+  );
+
+  app.patch(
+    "/api/platform/cms/legal/:id",
+    { preHandler: [requireAuth, requirePlatformAdmin] },
+    async (request, reply) => {
+      const { id } = idParam.parse(request.params);
+      const body = cmsLegalVersionUpdateSchema.parse(request.body);
+      const data: Parameters<typeof CmsService.updateCmsLegalVersion>[2] = {};
+      if (body.pageType !== undefined) data.pageType = body.pageType;
+      if (body.language !== undefined) data.language = body.language;
+      if (body.versionNumber !== undefined) data.versionNumber = body.versionNumber;
+      if (body.versionLabel !== undefined) data.versionLabel = body.versionLabel;
+      if (body.effectiveDate !== undefined) data.effectiveDate = body.effectiveDate;
+      if (body.status !== undefined) data.status = body.status;
+      if (body.body !== undefined) data.body = body.body;
+      if (body.summaryOfChanges !== undefined) data.summaryOfChanges = body.summaryOfChanges;
+      const result = await CmsService.updateCmsLegalVersion(app.db, id, data);
+      if (!result) return reply.status(404).send({ ...NOT_FOUND, message: "Legal version not found" });
+      return reply.send(result);
+    },
+  );
+
+  app.post(
+    "/api/platform/cms/legal/:id/publish",
+    { preHandler: [requireAuth, requirePlatformAdmin] },
+    async (request, reply) => {
+      const { id } = idParam.parse(request.params);
+      const result = await CmsService.publishCmsLegalVersion(app.db, id);
+      if (!result) return reply.status(404).send({ ...NOT_FOUND, message: "Legal version not found" });
+      return reply.send(result);
     },
   );
 }

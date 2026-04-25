@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { requireAuth } from "../../hooks/require-auth.js";
 import { requirePlatformAdmin } from "../../hooks/require-platform-admin.js";
 import { config } from "../../config.js";
+import { sendEmail } from "../../lib/email.js";
 
 const createLeadSchema = z.object({
   type: z.enum(["contact", "demo", "trial"]),
@@ -13,6 +14,7 @@ const createLeadSchema = z.object({
   email: z.string().email().max(255),
   company: z.string().max(200).optional(),
   phone: z.string().max(50).optional(),
+  topic: z.string().max(100).optional(),
   message: z.string().max(5000).optional(),
   metadata: z.record(z.unknown()).optional(),
   // UTM / attribution (captured client-side and forwarded)
@@ -43,6 +45,7 @@ export async function leadsRoutes(app: FastifyInstance): Promise<void> {
           lastName: body.lastName,
           company: body.company,
           phone: body.phone,
+          topic: body.topic,
           message: body.message,
           metadata: body.metadata ?? {},
           utmSource: body.utmSource,
@@ -64,6 +67,28 @@ export async function leadsRoutes(app: FastifyInstance): Promise<void> {
         });
       }
 
+      // Send admin notification email (non-blocking)
+      const adminEmails = config.ADMIN_NOTIFICATION_EMAIL
+        ? config.ADMIN_NOTIFICATION_EMAIL.split(",").map(e => e.trim()).filter(Boolean)
+        : [];
+      if (adminEmails.length > 0 && lead) {
+        Promise.all(adminEmails.map(to =>
+          sendEmail({
+            to,
+            subject: `Ny lead: ${body.type} från ${body.email}`,
+            html: `<h2>Ny lead</h2>
+        <p><b>Typ:</b> ${body.type}</p>
+        <p><b>E-post:</b> ${body.email}</p>
+        <p><b>Namn:</b> ${[body.firstName, body.lastName].filter(Boolean).join(" ") || "–"}</p>
+        <p><b>Företag:</b> ${body.company ?? "–"}</p>
+        <p><b>Ämne:</b> ${body.topic ?? "–"}</p>
+        <p><b>Meddelande:</b></p><pre style="background:#f5f5f5;padding:12px;border-radius:4px">${body.message ?? "–"}</pre>
+        <p style="font-size:12px;color:#999">UTM: ${[body.utmSource, body.utmMedium, body.utmCampaign].filter(Boolean).join(" / ")}</p>`,
+            text: `Ny lead: ${body.type}\nE-post: ${body.email}\nFöretag: ${body.company ?? "–"}\nÄmne: ${body.topic ?? "–"}\nMeddelande: ${body.message ?? "–"}`,
+          })
+        )).catch(() => {}); // non-blocking
+      }
+
       return reply.status(201).send({
         id: lead?.id,
         message: "Tack! Vi återkommer inom kort.",
@@ -75,7 +100,7 @@ export async function leadsRoutes(app: FastifyInstance): Promise<void> {
   // Platform admin: list all leads
   app.get(
     "/api/admin/leads",
-    { preHandler: [requireAuth, requirePlatformAdmin] as const },
+    { preHandler: [requireAuth, requirePlatformAdmin] },
     async (request, reply) => {
       const raw = request.query as Record<string, unknown>;
       const q = z.object({
@@ -106,7 +131,7 @@ export async function leadsRoutes(app: FastifyInstance): Promise<void> {
   // Platform admin: update lead status / notes
   app.patch(
     "/api/admin/leads/:id",
-    { preHandler: [requireAuth, requirePlatformAdmin] as const },
+    { preHandler: [requireAuth, requirePlatformAdmin] },
     async (request, reply) => {
       const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
       const body = z.object({

@@ -11,6 +11,7 @@ import {
   cmsHomepageSections,
   cmsRoadmapItems,
   cmsDocsArticles,
+  cmsLegalVersions,
   type CmsPage,
   type CmsPost,
   type CmsChangelogEntry,
@@ -21,6 +22,8 @@ import {
   type CmsHomepageSection,
   type CmsRoadmapItem,
   type CmsDocsArticle,
+  type CmsLegalVersion,
+  type LegalPageType,
 } from "../../db/schema/marketing-cms.js";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -439,6 +442,10 @@ export async function createCmsChangelog(
     body?: string;
     tags?: string[];
     category?: string;
+    versionLabel?: string;
+    highlights?: Array<{text: string; href?: string}>;
+    fixes?: Array<{text: string; href?: string}>;
+    docsLinks?: Array<{text: string; href: string}>;
     seoTitle?: string;
     seoDescription?: string;
   },
@@ -455,6 +462,10 @@ export async function createCmsChangelog(
   if (data.body !== undefined) insert["body"] = data.body;
   if (data.tags !== undefined) insert["tags"] = data.tags;
   if (data.category !== undefined) insert["category"] = data.category;
+  if (data.versionLabel !== undefined) insert["versionLabel"] = data.versionLabel;
+  if (data.highlights !== undefined) insert["highlights"] = data.highlights;
+  if (data.fixes !== undefined) insert["fixes"] = data.fixes;
+  if (data.docsLinks !== undefined) insert["docsLinks"] = data.docsLinks;
   if (data.seoTitle !== undefined) insert["seoTitle"] = data.seoTitle;
   if (data.seoDescription !== undefined) insert["seoDescription"] = data.seoDescription;
 
@@ -480,6 +491,10 @@ export async function updateCmsChangelog(
     body?: string;
     tags?: string[];
     category?: string;
+    versionLabel?: string;
+    highlights?: Array<{text: string; href?: string}>;
+    fixes?: Array<{text: string; href?: string}>;
+    docsLinks?: Array<{text: string; href: string}>;
     seoTitle?: string;
     seoDescription?: string;
   },
@@ -495,6 +510,10 @@ export async function updateCmsChangelog(
   if (data.body !== undefined) update["body"] = data.body;
   if (data.tags !== undefined) update["tags"] = data.tags;
   if (data.category !== undefined) update["category"] = data.category;
+  if (data.versionLabel !== undefined) update["versionLabel"] = data.versionLabel;
+  if (data.highlights !== undefined) update["highlights"] = data.highlights;
+  if (data.fixes !== undefined) update["fixes"] = data.fixes;
+  if (data.docsLinks !== undefined) update["docsLinks"] = data.docsLinks;
   if (data.seoTitle !== undefined) update["seoTitle"] = data.seoTitle;
   if (data.seoDescription !== undefined) update["seoDescription"] = data.seoDescription;
 
@@ -1346,6 +1365,8 @@ export async function listCmsRoadmapItems(
     language?: string;
     category?: string;
     quarter?: string;
+    itemStatus?: string;
+    tags?: string[];
     page: number;
     limit: number;
   },
@@ -1359,6 +1380,10 @@ export async function listCmsRoadmapItems(
     );
   if (opts.category) conditions.push(eq(cmsRoadmapItems.category, opts.category));
   if (opts.quarter) conditions.push(eq(cmsRoadmapItems.quarter, opts.quarter));
+  if (opts.itemStatus)
+    conditions.push(eq(cmsRoadmapItems.itemStatus, opts.itemStatus as CmsRoadmapItem["itemStatus"]));
+  if (opts.tags && opts.tags.length > 0)
+    conditions.push(sql`${cmsRoadmapItems.tags} ?| array[${sql.join(opts.tags.map(t => sql`${t}`), sql`, `)}]`);
 
   const where = conditions.length > 0 ? and(...conditions) : undefined;
 
@@ -1422,6 +1447,8 @@ export async function createCmsRoadmapItem(
     body?: string;
     excerpt?: string;
     votes?: number;
+    itemStatus?: "considering" | "planned" | "in_progress" | "shipped";
+    tags?: string[];
     seoTitle?: string;
     seoDescription?: string;
     ogImageUrl?: string;
@@ -1441,6 +1468,8 @@ export async function createCmsRoadmapItem(
   if (data.body !== undefined) insert["body"] = data.body;
   if (data.excerpt !== undefined) insert["excerpt"] = data.excerpt;
   if (data.votes !== undefined) insert["votes"] = data.votes;
+  if (data.itemStatus !== undefined) insert["itemStatus"] = data.itemStatus;
+  if (data.tags !== undefined) insert["tags"] = data.tags;
   if (data.seoTitle !== undefined) insert["seoTitle"] = data.seoTitle;
   if (data.seoDescription !== undefined) insert["seoDescription"] = data.seoDescription;
   if (data.ogImageUrl !== undefined) insert["ogImageUrl"] = data.ogImageUrl;
@@ -1469,6 +1498,8 @@ export async function updateCmsRoadmapItem(
     body?: string;
     excerpt?: string;
     votes?: number;
+    itemStatus?: "considering" | "planned" | "in_progress" | "shipped";
+    tags?: string[];
     seoTitle?: string;
     seoDescription?: string;
     ogImageUrl?: string;
@@ -1487,6 +1518,8 @@ export async function updateCmsRoadmapItem(
   if (data.body !== undefined) update["body"] = data.body;
   if (data.excerpt !== undefined) update["excerpt"] = data.excerpt;
   if (data.votes !== undefined) update["votes"] = data.votes;
+  if (data.itemStatus !== undefined) update["itemStatus"] = data.itemStatus;
+  if (data.tags !== undefined) update["tags"] = data.tags;
   if (data.seoTitle !== undefined) update["seoTitle"] = data.seoTitle;
   if (data.seoDescription !== undefined) update["seoDescription"] = data.seoDescription;
   if (data.ogImageUrl !== undefined) update["ogImageUrl"] = data.ogImageUrl;
@@ -1677,4 +1710,136 @@ export async function updateCmsDocsArticle(
 
 export async function deleteCmsDocsArticle(db: Db, id: string): Promise<void> {
   await db.delete(cmsDocsArticles).where(eq(cmsDocsArticles.id, id));
+}
+
+// ── Legal versions ──────────────────────────────────────────────────────────────
+
+export async function listCmsLegalVersions(
+  db: Db,
+  pageType: LegalPageType,
+  language: string,
+  includeNonPublished = false,
+): Promise<CmsLegalVersion[]> {
+  const conditions = [
+    eq(cmsLegalVersions.pageType, pageType),
+    eq(cmsLegalVersions.language, language as CmsLegalVersion["language"]),
+  ];
+  if (!includeNonPublished) {
+    conditions.push(eq(cmsLegalVersions.status, "published"));
+  }
+
+  return db
+    .select()
+    .from(cmsLegalVersions)
+    .where(and(...conditions))
+    .orderBy(desc(cmsLegalVersions.effectiveDate));
+}
+
+export async function getLatestPublishedLegalVersion(
+  db: Db,
+  pageType: LegalPageType,
+  language: string,
+): Promise<CmsLegalVersion | null> {
+  const [row] = await db
+    .select()
+    .from(cmsLegalVersions)
+    .where(
+      and(
+        eq(cmsLegalVersions.pageType, pageType),
+        eq(cmsLegalVersions.language, language as CmsLegalVersion["language"]),
+        eq(cmsLegalVersions.status, "published"),
+      ),
+    )
+    .orderBy(desc(cmsLegalVersions.effectiveDate))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function getLegalVersionById(
+  db: Db,
+  id: string,
+): Promise<CmsLegalVersion | null> {
+  const [row] = await db
+    .select()
+    .from(cmsLegalVersions)
+    .where(eq(cmsLegalVersions.id, id))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function createCmsLegalVersion(
+  db: Db,
+  data: {
+    pageType: LegalPageType;
+    language?: "sv" | "en" | "pl";
+    versionNumber: string;
+    versionLabel?: string;
+    effectiveDate: string;
+    status?: "draft" | "published" | "archived";
+    body?: string;
+    summaryOfChanges?: string;
+  },
+): Promise<CmsLegalVersion> {
+  const insert: Record<string, unknown> = {
+    pageType: data.pageType,
+    versionNumber: data.versionNumber,
+    effectiveDate: data.effectiveDate,
+  };
+
+  if (data.language !== undefined) insert["language"] = data.language;
+  if (data.versionLabel !== undefined) insert["versionLabel"] = data.versionLabel;
+  if (data.status !== undefined) insert["status"] = data.status;
+  if (data.body !== undefined) insert["body"] = data.body;
+  if (data.summaryOfChanges !== undefined) insert["summaryOfChanges"] = data.summaryOfChanges;
+
+  const [row] = await db
+    .insert(cmsLegalVersions)
+    .values(insert as typeof cmsLegalVersions.$inferInsert)
+    .returning();
+  return row!;
+}
+
+export async function updateCmsLegalVersion(
+  db: Db,
+  id: string,
+  data: {
+    pageType?: LegalPageType;
+    language?: "sv" | "en" | "pl";
+    versionNumber?: string;
+    versionLabel?: string;
+    effectiveDate?: string;
+    status?: "draft" | "published" | "archived";
+    body?: string;
+    summaryOfChanges?: string;
+  },
+): Promise<CmsLegalVersion | null> {
+  const update: Record<string, unknown> = { updatedAt: new Date() };
+
+  if (data.pageType !== undefined) update["pageType"] = data.pageType;
+  if (data.language !== undefined) update["language"] = data.language;
+  if (data.versionNumber !== undefined) update["versionNumber"] = data.versionNumber;
+  if (data.versionLabel !== undefined) update["versionLabel"] = data.versionLabel;
+  if (data.effectiveDate !== undefined) update["effectiveDate"] = data.effectiveDate;
+  if (data.status !== undefined) update["status"] = data.status;
+  if (data.body !== undefined) update["body"] = data.body;
+  if (data.summaryOfChanges !== undefined) update["summaryOfChanges"] = data.summaryOfChanges;
+
+  const [row] = await db
+    .update(cmsLegalVersions)
+    .set(update as Partial<typeof cmsLegalVersions.$inferInsert>)
+    .where(eq(cmsLegalVersions.id, id))
+    .returning();
+  return row ?? null;
+}
+
+export async function publishCmsLegalVersion(
+  db: Db,
+  id: string,
+): Promise<CmsLegalVersion | null> {
+  const [row] = await db
+    .update(cmsLegalVersions)
+    .set({ status: "published", updatedAt: new Date() })
+    .where(eq(cmsLegalVersions.id, id))
+    .returning();
+  return row ?? null;
 }

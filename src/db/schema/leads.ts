@@ -51,6 +51,7 @@ export const leads = pgTable(
     phone: varchar("phone", { length: 50 }),
 
     // Lead details
+    topic: varchar("topic", { length: 100 }),
     message: text("message"),
     // For demo: preferred time slot, for trial: plan interest
     metadata: jsonb("metadata").$type<Record<string, unknown>>().default(sql`'{}'::jsonb`),

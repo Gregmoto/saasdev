@@ -77,6 +77,9 @@ export const cmsPostUpdateSchema = cmsPostSchema.partial();
 
 // ── Changelog ─────────────────────────────────────────────────────────────────
 
+const cmsLinkItemSchema = z.object({ text: z.string(), href: z.string().optional() });
+const cmsDocsLinkItemSchema = z.object({ text: z.string(), href: z.string() });
+
 export const cmsChangelogSchema = z.object({
   slug: z.string().min(1).max(255),
   title: z.string().min(1).max(255),
@@ -87,6 +90,10 @@ export const cmsChangelogSchema = z.object({
   body: z.string().optional(),
   tags: z.array(z.string()).optional(),
   category: z.string().max(100).optional(),
+  versionLabel: z.string().max(100).optional(),
+  highlights: z.array(cmsLinkItemSchema).optional(),
+  fixes: z.array(cmsLinkItemSchema).optional(),
+  docsLinks: z.array(cmsDocsLinkItemSchema).optional(),
   seoTitle: z.string().max(255).optional(),
   seoDescription: z.string().optional(),
 });
@@ -239,6 +246,8 @@ export const cmsRoadmapItemSchema = z.object({
   body: z.string().optional(),
   excerpt: z.string().optional(),
   votes: z.number().int().min(0).optional(),
+  itemStatus: z.enum(["considering", "planned", "in_progress", "shipped"]).optional(),
+  tags: z.array(z.string()).optional(),
   seoTitle: z.string().max(255).optional(),
   seoDescription: z.string().optional(),
   ogImageUrl: z.string().optional(),
@@ -266,3 +275,18 @@ export const cmsDocsArticleSchema = z.object({
 });
 
 export const cmsDocsArticleUpdateSchema = cmsDocsArticleSchema.partial();
+
+// ── Legal versions ─────────────────────────────────────────────────────────────
+
+export const cmsLegalVersionSchema = z.object({
+  pageType: z.enum(["privacy", "terms", "cookies", "dpa"]),
+  language: languageEnum.optional(),
+  versionNumber: z.string().min(1).max(20),
+  versionLabel: z.string().max(100).optional(),
+  effectiveDate: z.string().min(1),   // ISO date string e.g. "2026-01-01"
+  status: z.enum(["draft", "published", "archived"]).optional(),
+  body: z.string().optional(),
+  summaryOfChanges: z.string().optional(),
+});
+
+export const cmsLegalVersionUpdateSchema = cmsLegalVersionSchema.partial();

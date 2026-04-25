@@ -164,6 +164,10 @@ export const cmsChangelogEntries = pgTable(
     body: text("body").notNull().default(""),           // markdown
     tags: jsonb("tags").$type<string[]>().default(sql`'[]'::jsonb`), // new/fix/improvement/etc.
     category: varchar("category", { length: 100 }),    // e.g. "Payments", "API"
+    versionLabel: varchar("version_label", { length: 100 }),
+    highlights: jsonb("highlights").$type<Array<{text: string; href?: string}>>().default(sql`'[]'::jsonb`),
+    fixes: jsonb("fixes").$type<Array<{text: string; href?: string}>>().default(sql`'[]'::jsonb`),
+    docsLinks: jsonb("docs_links").$type<Array<{text: string; href: string}>>().default(sql`'[]'::jsonb`),
 
     // SEO
     seoTitle: varchar("seo_title", { length: 255 }),
@@ -380,6 +384,12 @@ export const cmsHomepageSections = pgTable(
   }),
 );
 
+// ── New enums for roadmap and legal ──────────────────────────────────────────
+
+export const roadmapItemStatusEnum = pgEnum("roadmap_item_status", ["considering", "planned", "in_progress", "shipped"]);
+export const legalPageTypeEnum = pgEnum("legal_page_type", ["privacy", "terms", "cookies", "dpa"]);
+export const legalVersionStatusEnum = pgEnum("legal_version_status", ["draft", "published", "archived"]);
+
 // ── cms_roadmap_items ─────────────────────────────────────────────────────────
 // Public product roadmap (e.g. Q2 2026 planned features)
 
@@ -397,6 +407,8 @@ export const cmsRoadmapItems = pgTable(
     body: text("body"),
     excerpt: text("excerpt"),
     votes: integer("votes").notNull().default(0),
+    itemStatus: roadmapItemStatusEnum("item_status").notNull().default("planned"),
+    tags: jsonb("tags").$type<string[]>().default(sql`'[]'::jsonb`),
     seoTitle: varchar("seo_title", { length: 255 }),
     seoDescription: text("seo_description"),
     ogImageUrl: text("og_image_url"),
@@ -410,6 +422,31 @@ export const cmsRoadmapItems = pgTable(
     statusIdx: index("cms_roadmap_status_idx").on(t.status),
     categoryIdx: index("cms_roadmap_category_idx").on(t.category),
     quarterIdx: index("cms_roadmap_quarter_idx").on(t.quarter),
+    itemStatusIdx: index("cms_roadmap_item_status_idx").on(t.itemStatus),
+  }),
+);
+
+// ── cms_legal_versions ────────────────────────────────────────────────────────
+// Versioned legal pages (privacy policy, terms, cookies, DPA)
+
+export const cmsLegalVersions = pgTable(
+  "cms_legal_versions",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    pageType: legalPageTypeEnum("page_type").notNull(),
+    language: cmsLanguageEnum("language").notNull().default("sv"),
+    versionNumber: varchar("version_number", { length: 20 }).notNull(),
+    versionLabel: varchar("version_label", { length: 100 }),
+    effectiveDate: timestamp("effective_date", { withTimezone: false, mode: "string" }).notNull(),
+    status: legalVersionStatusEnum("status").notNull().default("draft"),
+    body: text("body").notNull().default(""),
+    summaryOfChanges: text("summary_of_changes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    typeLanguageVersionUnique: uniqueIndex("cms_legal_versions_type_lang_ver_unique").on(t.pageType, t.language, t.versionNumber),
+    typeStatusIdx: index("cms_legal_versions_type_lang_status_idx").on(t.pageType, t.language, t.status),
   }),
 );
 
@@ -457,5 +494,8 @@ export type CmsFeature = typeof cmsFeatures.$inferSelect;
 export type CmsHomepageSection = typeof cmsHomepageSections.$inferSelect;
 export type CmsRoadmapItem = typeof cmsRoadmapItems.$inferSelect;
 export type CmsDocsArticle = typeof cmsDocsArticles.$inferSelect;
+export type CmsLegalVersion = typeof cmsLegalVersions.$inferSelect;
 export type CmsStatus = (typeof cmsStatusEnum.enumValues)[number];
 export type CmsLanguage = (typeof cmsLanguageEnum.enumValues)[number];
+export type LegalPageType = (typeof legalPageTypeEnum.enumValues)[number];
+export type RoadmapItemStatus = (typeof roadmapItemStatusEnum.enumValues)[number];

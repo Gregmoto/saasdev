@@ -35,6 +35,9 @@ const envSchema = z.object({
   // Lead capture webhook (CRM / email tool)
   LEAD_WEBHOOK_URL: z.string().default(""),
 
+  // Comma-separated list of admin emails to notify on new lead submissions
+  ADMIN_NOTIFICATION_EMAIL: z.string().default(""),
+
   // OpenAI for AI-assisted FAQ suggestions (optional)
   OPENAI_API_KEY: z.string().default(""),
 
