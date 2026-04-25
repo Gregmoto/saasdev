@@ -237,7 +237,7 @@ export default function StartPage() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          tillbaka till ShopMan.se
+          Tillbaka till ShopMan.se
         </Link>
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 font-bold text-gray-900 text-lg tracking-tight">
           <span className="text-blue-600">⚡</span> ShopMan
@@ -485,6 +485,15 @@ export default function StartPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </a>
+                    <Link
+                      href="/"
+                      className="mt-3 inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                      Tillbaka till startsidan
+                    </Link>
                   </div>
                 )}
               </>

@@ -11,6 +11,8 @@ export function buildMetadata(opts: {
   ogImage?: string;
   language?: "sv" | "en";
   noIndex?: boolean;
+  /** OpenGraph type override — defaults to "website" */
+  type?: "website" | "article";
 }): Metadata {
   const canonical = `${SITE_URL}${opts.path}`;
   const ogImage = opts.ogImage ?? DEFAULT_OG_IMAGE;
@@ -37,13 +39,35 @@ export function buildMetadata(opts: {
       siteName: SITE_NAME,
       images: [{ url: `${SITE_URL}${ogImage}` }],
       locale: "sv_SE",
-      type: "website",
+      type: opts.type ?? "website",
     },
     twitter: {
       card: "summary_large_image",
       title: fullTitle,
       description: opts.description,
       images: [`${SITE_URL}${ogImage}`],
+    },
+  };
+}
+
+export function buildArticleMetadata(opts: {
+  title: string;
+  description: string;
+  path: string;
+  publishedAt: string; // ISO date
+  modifiedAt?: string;
+  ogImage?: string;
+  tags?: string[];
+}): Metadata {
+  const base = buildMetadata({ ...opts, type: "article" });
+  return {
+    ...base,
+    openGraph: {
+      ...(base.openGraph as object),
+      type: "article",
+      publishedTime: opts.publishedAt,
+      ...(opts.modifiedAt ? { modifiedTime: opts.modifiedAt } : {}),
+      ...(opts.tags?.length ? { tags: opts.tags } : {}),
     },
   };
 }

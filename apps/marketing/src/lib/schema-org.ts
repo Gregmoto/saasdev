@@ -110,6 +110,19 @@ export function faqSchema(
   };
 }
 
+/** Breadcrumb schema using name/url property shape (alias for docsBreadcrumbSchema). */
+export function docsBreadcrumbSchema(
+  section: string,
+  title: string,
+  url: string
+): object {
+  return breadcrumbSchema([
+    { label: "Hem", url: SITE_URL },
+    { label: section, url: `${SITE_URL}/docs` },
+    { label: title, url },
+  ]);
+}
+
 export function softwareAppSchema(): object {
   return {
     "@context": "https://schema.org",
@@ -142,3 +155,6 @@ export function softwareAppSchema(): object {
     },
   };
 }
+
+/** Alias matching the task spec name. */
+export const softwareApplicationSchema = softwareAppSchema;
