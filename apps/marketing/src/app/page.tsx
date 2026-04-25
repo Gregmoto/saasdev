@@ -90,19 +90,19 @@ const INTEGRATIONS = [
 const PLANS = [
   {
     name: "Starter",
-    price: "599 kr",
+    price: "299 kr",
     period: "/månad",
     desc: "Perfekt för enskilda butiker.",
-    features: ["1 butik", "Upp till 1 000 produkter", "5 000 ordrar/mån", "Importcenter", "E-postsupport"],
+    features: ["1 butik", "Obegränsat antal produkter", "3 användare", "Importcenter", "E-postsupport"],
     cta: "Kom igång",
     highlight: false,
   },
   {
     name: "Growth",
-    price: "1 499 kr",
+    price: "1 199 kr",
     period: "/månad",
     desc: "För växande handlare med flera kanaler.",
-    features: ["5 butiker", "Obegränsat antal produkter", "25 000 ordrar/mån", "Multishop", "API-åtkomst"],
+    features: ["MultiShop (flera butiker)", "Obegränsat antal produkter", "API-åtkomst", "Avancerad analys", "Prioriterad support"],
     cta: "Kom igång",
     highlight: true,
   },

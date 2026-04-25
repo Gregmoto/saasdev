@@ -135,11 +135,11 @@ export function softwareAppSchema(): object {
       "ShopMan är en samlad e-handelsplattform för moderna handlare. Hantera produkter, ordrar, lager och kunder från ett ställe.",
     offers: {
       "@type": "Offer",
-      price: "599",
+      price: "299",
       priceCurrency: "SEK",
       priceSpecification: {
         "@type": "UnitPriceSpecification",
-        price: "599",
+        price: "299",
         priceCurrency: "SEK",
         referenceQuantity: {
           "@type": "QuantitativeValue",
