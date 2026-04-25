@@ -21,6 +21,7 @@ function useUtm() {
 }
 
 const PLAN_OPTIONS = [
+  { value: "free", label: "Free", price: "0 kr/mån", desc: "Upp till 250 produkter och 100 ordrar/mån" },
   { value: "starter", label: "Starter", price: "299 kr/mån", desc: "Obegränsat produkter, 1 butik, 3 användare" },
   { value: "growth", label: "Growth", price: "1 199 kr/mån", desc: "MultiShop, API-åtkomst, avancerad analys" },
   { value: "enterprise", label: "Enterprise", price: "Kontakt", desc: "Obegränsat, dedikerad support" },

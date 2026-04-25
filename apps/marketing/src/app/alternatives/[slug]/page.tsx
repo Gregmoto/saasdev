@@ -58,7 +58,7 @@ const COMPETITORS: Record<string, CompetitorData> = {
     heroTitle: "ShopMan — det bästa alternativet till Shopify för svenska handlare",
     heroSubtitle: "Slipp Shopify-avgifter, inbyggt Fortnox-stöd och fullt anpassad för den svenska marknaden.",
     quickComparison: [
-      { metric: "Startpris", shopman: "299 kr/mån", competitor: "ca 350 kr/mån (Shopify Basic)", winner: "competitor" },
+      { metric: "Startpris", shopman: "Gratis (Free) · 299 kr/mån (Starter)", competitor: "ca 350 kr/mån (Shopify Basic)", winner: "competitor" },
       { metric: "Transaktionsavgift", shopman: "0%", competitor: "0,5–2% utan Shopify Payments", winner: "shopman" },
       { metric: "Antal produkter (Starter)", shopman: "500", competitor: "Obegränsat", winner: "competitor" },
       { metric: "Fortnox-integration", shopman: "Native, inbyggd", competitor: "Tredjepartapp, extra kostnad", winner: "shopman" },
@@ -115,7 +115,7 @@ const COMPETITORS: Record<string, CompetitorData> = {
       "Serverside rendering för snabbast möjliga TTFB",
     ],
     pricing: {
-      shopmanEntry: "299 kr/mån",
+      shopmanEntry: "Gratis (Free) eller 299 kr/mån (Starter)",
       shopmanMid: "1 199 kr/mån",
       competitorEntry: "ca 350 kr/mån (Basic)",
       competitorMid: "ca 1 050 kr/mån (Shopify) + transaktionsavgifter",
@@ -134,7 +134,7 @@ const COMPETITORS: Record<string, CompetitorData> = {
     heroTitle: "ShopMan — det bästa alternativet till WooCommerce",
     heroSubtitle: "Slipp WordPress-komplexiteten. Få en dedikerad e-handelsplattform med inbyggd bokföring och leverantörssynk.",
     quickComparison: [
-      { metric: "Startpris", shopman: "299 kr/mån (allt inkl.)", competitor: "Gratis + hosting ca 200 kr/mån + plugins", winner: "tie" },
+      { metric: "Startpris", shopman: "Gratis (Free) · 299 kr/mån (allt inkl.)", competitor: "Gratis + hosting ca 200 kr/mån + plugins", winner: "tie" },
       { metric: "Teknisk drift", shopman: "Hanteras av ShopMan", competitor: "Du hanterar server, säkerhet och uppdateringar", winner: "shopman" },
       { metric: "Fortnox-integration", shopman: "Native, inbyggd", competitor: "Plugin, extra kostnad och komplex setup", winner: "shopman" },
       { metric: "Laddningstid", shopman: "Under 1,2 sek i snitt", competitor: "Beror på hosting och plugin-stack", winner: "shopman" },
@@ -191,7 +191,7 @@ const COMPETITORS: Record<string, CompetitorData> = {
       "Automatiska säkerhetsuppdateringar och malware-skydd",
     ],
     pricing: {
-      shopmanEntry: "299 kr/mån (allt inkluderat)",
+      shopmanEntry: "Gratis (Free) eller 299 kr/mån (allt inkluderat)",
       shopmanMid: "1 199 kr/mån",
       competitorEntry: "0 kr (WooCommerce) + 200 kr/mån hosting + plugins",
       competitorMid: "500–2 000 kr/mån beroende på plugins och hosting",
@@ -267,7 +267,7 @@ const COMPETITORS: Record<string, CompetitorData> = {
       "Automatisk säkerhetsövervakning och DDoS-skydd",
     ],
     pricing: {
-      shopmanEntry: "299 kr/mån (allt inkluderat)",
+      shopmanEntry: "Gratis (Free) eller 299 kr/mån (allt inkluderat)",
       shopmanMid: "1 199 kr/mån",
       competitorEntry: "0 kr (PrestaShop) + 300–800 kr/mån hosting",
       competitorMid: "500–3 000 kr/mån med modules och hosting",

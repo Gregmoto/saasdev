@@ -89,6 +89,15 @@ const INTEGRATIONS = [
 
 const PLANS = [
   {
+    name: "Free",
+    price: "0 kr",
+    period: "/månad",
+    desc: "Kom igång utan kostnad.",
+    features: ["Upp till 250 produkter", "100 ordrar/månad", "1 användare", "1 butik", "Grundläggande SEO"],
+    cta: "Starta gratis",
+    highlight: false,
+  },
+  {
     name: "Starter",
     price: "299 kr",
     period: "/månad",
