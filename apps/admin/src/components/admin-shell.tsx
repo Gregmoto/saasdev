@@ -6,6 +6,7 @@ import { cn } from "@saas-shop/ui";
 
 const NAV = [
   { label: "Dashboard", href: "/admin/dashboard", icon: "🏠" },
+  { label: "Installationsguide", href: "/admin/setup", icon: "🚀" },
   { label: "Products", href: "/admin/products", icon: "📦" },
   { label: "Kategorier", href: "/admin/categories", icon: "🗂️" },
   { label: "Varumärken", href: "/admin/brands", icon: "🏷️" },
@@ -51,7 +52,7 @@ export function AdminShell({
       <aside className="w-60 flex-shrink-0 bg-zinc-900 flex flex-col">
         {/* Logo + store info */}
         <div className="px-4 py-5 border-b border-zinc-800">
-          <div className="text-white font-bold text-lg">⚡ SaaS Shop</div>
+          <div className="text-white font-bold text-lg">⚡ ShopMan</div>
           <div className="mt-3 text-xs text-zinc-400 uppercase tracking-wider">Store</div>
           <div className="mt-1 text-white text-sm font-medium">{storeName ?? "My Store"}</div>
           {storeSlug && (
