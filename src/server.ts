@@ -1,10 +1,14 @@
 import { buildApp } from "./app.js";
 import { config } from "./config.js";
+import { runStartupSeed } from "./db/startup-seed.js";
 
 const app = buildApp();
 
 const start = async () => {
   try {
+    // Run migrations + upsert super-admin on every boot so Railway
+    // deployments always have the correct credentials.
+    await runStartupSeed();
     await app.listen({ port: config.PORT, host: config.HOST });
   } catch (err) {
     app.log.fatal(err, "Failed to start server");

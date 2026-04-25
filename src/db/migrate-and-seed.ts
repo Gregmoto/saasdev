@@ -57,42 +57,35 @@ async function main() {
     console.log(`  ✅ Store account created (${storeId})`);
   }
 
-  // Super admin user
+  // Super admin user — always upsert so password is correct on every deploy
   const SUPER_EMAIL = "info@gregmoto.se";
   const SUPER_PASS = "ShopMan2026!";
-  const existingUserRows = await sql`
-    SELECT id FROM auth_users WHERE email = ${SUPER_EMAIL} LIMIT 1
-  `.catch(() => [] as Array<{ id: string }>);
+  const passwordHash = await hashPassword(SUPER_PASS);
 
-  let userId: string;
-  const existingUser = existingUserRows[0];
-  if (existingUser) {
-    userId = existingUser.id as string;
-    console.log(`  ⏭  Super admin already exists (${userId})`);
-  } else {
-    const passwordHash = await hashPassword(SUPER_PASS);
-    const userRows = await sql<Array<{ id: string }>>`
-      INSERT INTO auth_users (email, password_hash, home_store_account_id)
-      VALUES (${SUPER_EMAIL}, ${passwordHash}, ${storeId})
-      RETURNING id
-    `;
-    const user = userRows[0];
-    if (!user) throw new Error("Failed to create super admin user");
-    userId = user.id;
+  const userRows = await sql<Array<{ id: string }>>`
+    INSERT INTO auth_users (email, password_hash, is_active, home_store_account_id)
+    VALUES (${SUPER_EMAIL}, ${passwordHash}, true, ${storeId})
+    ON CONFLICT (email) DO UPDATE
+      SET password_hash         = EXCLUDED.password_hash,
+          is_active             = true,
+          home_store_account_id = EXCLUDED.home_store_account_id,
+          updated_at            = now()
+    RETURNING id
+  `;
+  const userId: string = userRows[0]?.id ?? (() => { throw new Error("Failed to upsert super admin"); })();
+  console.log(`  ✅ Super admin upserted (${userId})`);
 
-    await sql`
-      INSERT INTO store_memberships (user_id, store_account_id, role, accepted_at)
-      VALUES (${userId}, ${storeId}, 'store_admin', now())
-      ON CONFLICT DO NOTHING
+  await sql`
+    INSERT INTO store_memberships (user_id, store_account_id, role, is_active, accepted_at)
+    VALUES (${userId}, ${storeId}, 'store_admin', true, now())
+    ON CONFLICT (user_id, store_account_id) DO UPDATE
+      SET role = 'store_admin', is_active = true, updated_at = now()
+  `;
+  await sql`
+      INSERT INTO platform_memberships (user_id, is_active)
+      VALUES (${userId}, true)
+      ON CONFLICT (user_id) DO UPDATE SET is_active = true, updated_at = now()
     `;
-    await sql`
-      INSERT INTO platform_memberships (user_id)
-      VALUES (${userId})
-      ON CONFLICT DO NOTHING
-    `;
-
-    console.log(`  ✅ Super admin created: ${SUPER_EMAIL} / ${SUPER_PASS}`);
-  }
 
   // ── 3. Seed: Demo Marketplace user ───────────────────────────────────────
   const MARKET_EMAIL = "marketplace@demo.shopman.dev";
