@@ -16,9 +16,9 @@
 
 import fp from "fastify-plugin";
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { storeAccounts } from "../../db/schema/store-accounts.js";
-import { authUsers } from "../../db/schema/auth.js";
+import { platformMemberships } from "../../db/schema/index.js";
 
 const WRITE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
@@ -54,13 +54,18 @@ export default fp(async function demoReadOnlyPlugin(app: FastifyInstance) {
 
     // 5. Platform super-admins are allowed to mutate demo data.
     try {
-      const [user] = await app.db
-        .select({ isPlatformAdmin: authUsers.isPlatformAdmin })
-        .from(authUsers)
-        .where(eq(authUsers.id, userId))
+      const [membership] = await app.db
+        .select({ id: platformMemberships.id })
+        .from(platformMemberships)
+        .where(
+          and(
+            eq(platformMemberships.userId, userId),
+            eq(platformMemberships.isActive, true),
+          ),
+        )
         .limit(1);
 
-      if (user?.isPlatformAdmin) return;
+      if (membership) return;
     } catch {
       // DB unavailable — fail open.
       return;
@@ -69,7 +74,6 @@ export default fp(async function demoReadOnlyPlugin(app: FastifyInstance) {
     // 6. Resolve the store account from the request context (set by requireStoreAccountContext)
     //    or fall back to the Host header slug lookup.
     const storeAccountId: string | undefined =
-      // @ts-expect-error — storeAccount is decorated by requireStoreAccountContext
       (request.storeAccount as { id?: string } | undefined)?.id;
 
     if (!storeAccountId) return;

@@ -298,7 +298,8 @@ async function seedOrders(
     const totalCents = subtotal + taxCents;
     const createdAt = dateOffset(daysAgo);
 
-    const orderRows = await sql<Array<{ id: string }>>`
+    const shippingAddr = JSON.stringify({ street: "Demovägen 1", city: "Stockholm", postalCode: "11122", country: "SE" });
+    const orderRows: Array<{ id: string }> = await sql`
       INSERT INTO orders (
         store_account_id, order_number, customer_id,
         customer_email, customer_first_name, customer_last_name,
@@ -311,13 +312,13 @@ async function seedOrders(
         ${customerEmail}, ${firstName}, ${lastName},
         ${status}, ${paymentStatus}, ${status === "delivered" ? "fulfilled" : status === "shipped" ? "partial" : "unfulfilled"},
         ${subtotal}, ${taxCents}, ${totalCents}, 'SEK',
-        ${{ street: "Demovägen 1", city: "Stockholm", postalCode: "11122", country: "SE" }}::jsonb,
+        ${shippingAddr}::jsonb,
         ${createdAt.toISOString()}, ${createdAt.toISOString()}
       )
       ON CONFLICT (store_account_id, order_number) DO UPDATE SET
         status = EXCLUDED.status, updated_at = now()
       RETURNING id
-    `.catch(() => [] as Array<{ id: string }>);
+    `.catch(() => []) as Array<{ id: string }>;
 
     const orderId = orderRows[0]?.id;
     if (!orderId) continue;
