@@ -13,6 +13,7 @@ const PA_NAV = [
   { label: "Security Logs", href: "/platform-admin/security", icon: "🔒" },
   { label: "Jobs", href: "/platform-admin/jobs", icon: "⚙️" },
   { label: "Settings", href: "/platform-admin/settings", icon: "⚙️" },
+  { label: "UI-checklista", href: "/platform-admin/ui-checklist", icon: "✅" },
 ];
 
 export function PlatformAdminShell({

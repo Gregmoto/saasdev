@@ -225,3 +225,44 @@ export const cmsHomepageSectionUpsertSchema = z.object({
   sortOrder: z.number().int().optional(),
   content: z.record(z.unknown()),
 });
+
+// ── Roadmap items ──────────────────────────────────────────────────────────────
+
+export const cmsRoadmapItemSchema = z.object({
+  slug: z.string().min(1).max(255),
+  title: z.string().min(1).max(255),
+  status: statusEnum.optional(),
+  language: languageEnum.optional(),
+  category: z.string().max(100).optional(),
+  priority: z.number().int().optional(),
+  quarter: z.string().max(20).optional(),
+  body: z.string().optional(),
+  excerpt: z.string().optional(),
+  votes: z.number().int().min(0).optional(),
+  seoTitle: z.string().max(255).optional(),
+  seoDescription: z.string().optional(),
+  ogImageUrl: z.string().optional(),
+  canonicalUrl: z.string().optional(),
+});
+
+export const cmsRoadmapItemUpdateSchema = cmsRoadmapItemSchema.partial();
+
+// ── Docs articles ──────────────────────────────────────────────────────────────
+
+export const cmsDocsArticleSchema = z.object({
+  slug: z.string().min(1).max(255),
+  title: z.string().min(1).max(255),
+  status: statusEnum.optional(),
+  language: languageEnum.optional(),
+  section: z.string().max(100).optional(),
+  sortOrder: z.number().int().optional(),
+  parentId: z.string().uuid().optional(),
+  body: z.string().optional(),
+  excerpt: z.string().optional(),
+  seoTitle: z.string().max(255).optional(),
+  seoDescription: z.string().optional(),
+  ogImageUrl: z.string().optional(),
+  canonicalUrl: z.string().optional(),
+});
+
+export const cmsDocsArticleUpdateSchema = cmsDocsArticleSchema.partial();

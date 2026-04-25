@@ -20,12 +20,16 @@ import {
   cmsFeatureSchema,
   cmsFeatureUpdateSchema,
   cmsHomepageSectionUpsertSchema,
+  cmsRoadmapItemSchema,
+  cmsRoadmapItemUpdateSchema,
+  cmsDocsArticleSchema,
+  cmsDocsArticleUpdateSchema,
 } from "./schemas.js";
 
 const idParam = z.object({ id: z.string().uuid() });
 const slugParam = z.object({ slug: z.string().min(1) });
 const langQuery = z.object({ lang: z.enum(["sv", "en", "pl"]).default("sv") });
-const adminPreHandler = [requireAuth, requirePlatformAdmin] as const;
+const adminPreHandler = [requireAuth, requirePlatformAdmin];
 
 const NOT_FOUND = { statusCode: 404, error: "Not Found" } as const;
 
@@ -750,6 +754,205 @@ export async function marketingCmsRoutes(app: FastifyInstance): Promise<void> {
     async (_request, reply) => {
       const counts = await CmsService.publishScheduledContent(app.db);
       return reply.send({ published: counts });
+    },
+  );
+
+  // ── Public: Roadmap ───────────────────────────────────────────────────────────
+
+  app.get("/api/cms/roadmap", async (request, reply) => {
+    const raw = request.query as Record<string, unknown>;
+    const query = cmsListQuerySchema.parse({
+      page: raw["page"],
+      limit: raw["limit"],
+      language: raw["lang"],
+    });
+    const opts: {
+      status: string;
+      language?: string;
+      category?: string;
+      quarter?: string;
+      page: number;
+      limit: number;
+    } = { status: "published", page: query.page, limit: query.limit };
+    if (query.language !== undefined) opts.language = query.language;
+    const categoryRaw = raw["category"];
+    if (typeof categoryRaw === "string" && categoryRaw) opts.category = categoryRaw;
+    const quarterRaw = raw["quarter"];
+    if (typeof quarterRaw === "string" && quarterRaw) opts.quarter = quarterRaw;
+    const result = await CmsService.listCmsRoadmapItems(app.db, opts);
+    return reply.send(result);
+  });
+
+  app.get("/api/cms/roadmap/:slug", async (request, reply) => {
+    const { slug } = slugParam.parse(request.params);
+    const { lang } = langQuery.parse(request.query);
+    const item = await CmsService.getCmsRoadmapItemBySlug(app.db, slug, lang);
+    if (!item || item.status !== "published") {
+      return reply.status(404).send({ ...NOT_FOUND, message: "Roadmap item not found" });
+    }
+    return reply.send(item);
+  });
+
+  // ── Public: Docs ──────────────────────────────────────────────────────────────
+
+  app.get("/api/cms/docs", async (request, reply) => {
+    const raw = request.query as Record<string, unknown>;
+    const query = cmsListQuerySchema.parse({
+      page: raw["page"],
+      limit: raw["limit"],
+      language: raw["lang"],
+    });
+    const opts: {
+      status: string;
+      language?: string;
+      section?: string;
+      page: number;
+      limit: number;
+    } = { status: "published", page: query.page, limit: query.limit };
+    if (query.language !== undefined) opts.language = query.language;
+    const sectionRaw = raw["section"];
+    if (typeof sectionRaw === "string" && sectionRaw) opts.section = sectionRaw;
+    const result = await CmsService.listCmsDocsArticles(app.db, opts);
+    return reply.send(result);
+  });
+
+  app.get("/api/cms/docs/:slug", async (request, reply) => {
+    const { slug } = slugParam.parse(request.params);
+    const { lang } = langQuery.parse(request.query);
+    const item = await CmsService.getCmsDocsArticleBySlug(app.db, slug, lang);
+    if (!item || item.status !== "published") {
+      return reply.status(404).send({ ...NOT_FOUND, message: "Docs article not found" });
+    }
+    return reply.send(item);
+  });
+
+  // ── Admin: Roadmap items ──────────────────────────────────────────────────────
+
+  app.post(
+    "/api/platform/cms/roadmap",
+    { preHandler: [requireAuth, requirePlatformAdmin] },
+    async (request, reply) => {
+      const body = cmsRoadmapItemSchema.parse(request.body);
+      const data: Parameters<typeof CmsService.createCmsRoadmapItem>[1] = {
+        slug: body.slug,
+        title: body.title,
+      };
+      if (body.status !== undefined) data.status = body.status;
+      if (body.language !== undefined) data.language = body.language;
+      if (body.category !== undefined) data.category = body.category;
+      if (body.priority !== undefined) data.priority = body.priority;
+      if (body.quarter !== undefined) data.quarter = body.quarter;
+      if (body.body !== undefined) data.body = body.body;
+      if (body.excerpt !== undefined) data.excerpt = body.excerpt;
+      if (body.votes !== undefined) data.votes = body.votes;
+      if (body.seoTitle !== undefined) data.seoTitle = body.seoTitle;
+      if (body.seoDescription !== undefined) data.seoDescription = body.seoDescription;
+      if (body.ogImageUrl !== undefined) data.ogImageUrl = body.ogImageUrl;
+      if (body.canonicalUrl !== undefined) data.canonicalUrl = body.canonicalUrl;
+      const result = await CmsService.createCmsRoadmapItem(app.db, data);
+      return reply.status(201).send(result);
+    },
+  );
+
+  app.patch(
+    "/api/platform/cms/roadmap/:id",
+    { preHandler: [requireAuth, requirePlatformAdmin] },
+    async (request, reply) => {
+      const { id } = idParam.parse(request.params);
+      const body = cmsRoadmapItemUpdateSchema.parse(request.body);
+      const data: Parameters<typeof CmsService.updateCmsRoadmapItem>[2] = {};
+      if (body.slug !== undefined) data.slug = body.slug;
+      if (body.title !== undefined) data.title = body.title;
+      if (body.status !== undefined) data.status = body.status;
+      if (body.language !== undefined) data.language = body.language;
+      if (body.category !== undefined) data.category = body.category;
+      if (body.priority !== undefined) data.priority = body.priority;
+      if (body.quarter !== undefined) data.quarter = body.quarter;
+      if (body.body !== undefined) data.body = body.body;
+      if (body.excerpt !== undefined) data.excerpt = body.excerpt;
+      if (body.votes !== undefined) data.votes = body.votes;
+      if (body.seoTitle !== undefined) data.seoTitle = body.seoTitle;
+      if (body.seoDescription !== undefined) data.seoDescription = body.seoDescription;
+      if (body.ogImageUrl !== undefined) data.ogImageUrl = body.ogImageUrl;
+      if (body.canonicalUrl !== undefined) data.canonicalUrl = body.canonicalUrl;
+      const result = await CmsService.updateCmsRoadmapItem(app.db, id, data);
+      if (!result)
+        return reply.status(404).send({ ...NOT_FOUND, message: "Roadmap item not found" });
+      return reply.send(result);
+    },
+  );
+
+  app.delete(
+    "/api/platform/cms/roadmap/:id",
+    { preHandler: [requireAuth, requirePlatformAdmin] },
+    async (request, reply) => {
+      const { id } = idParam.parse(request.params);
+      await CmsService.deleteCmsRoadmapItem(app.db, id);
+      return reply.status(204).send();
+    },
+  );
+
+  // ── Admin: Docs articles ──────────────────────────────────────────────────────
+
+  app.post(
+    "/api/platform/cms/docs",
+    { preHandler: [requireAuth, requirePlatformAdmin] },
+    async (request, reply) => {
+      const body = cmsDocsArticleSchema.parse(request.body);
+      const data: Parameters<typeof CmsService.createCmsDocsArticle>[1] = {
+        slug: body.slug,
+        title: body.title,
+      };
+      if (body.status !== undefined) data.status = body.status;
+      if (body.language !== undefined) data.language = body.language;
+      if (body.section !== undefined) data.section = body.section;
+      if (body.sortOrder !== undefined) data.sortOrder = body.sortOrder;
+      if (body.parentId !== undefined) data.parentId = body.parentId;
+      if (body.body !== undefined) data.body = body.body;
+      if (body.excerpt !== undefined) data.excerpt = body.excerpt;
+      if (body.seoTitle !== undefined) data.seoTitle = body.seoTitle;
+      if (body.seoDescription !== undefined) data.seoDescription = body.seoDescription;
+      if (body.ogImageUrl !== undefined) data.ogImageUrl = body.ogImageUrl;
+      if (body.canonicalUrl !== undefined) data.canonicalUrl = body.canonicalUrl;
+      const result = await CmsService.createCmsDocsArticle(app.db, data);
+      return reply.status(201).send(result);
+    },
+  );
+
+  app.patch(
+    "/api/platform/cms/docs/:id",
+    { preHandler: [requireAuth, requirePlatformAdmin] },
+    async (request, reply) => {
+      const { id } = idParam.parse(request.params);
+      const body = cmsDocsArticleUpdateSchema.parse(request.body);
+      const data: Parameters<typeof CmsService.updateCmsDocsArticle>[2] = {};
+      if (body.slug !== undefined) data.slug = body.slug;
+      if (body.title !== undefined) data.title = body.title;
+      if (body.status !== undefined) data.status = body.status;
+      if (body.language !== undefined) data.language = body.language;
+      if (body.section !== undefined) data.section = body.section;
+      if (body.sortOrder !== undefined) data.sortOrder = body.sortOrder;
+      if (body.parentId !== undefined) data.parentId = body.parentId;
+      if (body.body !== undefined) data.body = body.body;
+      if (body.excerpt !== undefined) data.excerpt = body.excerpt;
+      if (body.seoTitle !== undefined) data.seoTitle = body.seoTitle;
+      if (body.seoDescription !== undefined) data.seoDescription = body.seoDescription;
+      if (body.ogImageUrl !== undefined) data.ogImageUrl = body.ogImageUrl;
+      if (body.canonicalUrl !== undefined) data.canonicalUrl = body.canonicalUrl;
+      const result = await CmsService.updateCmsDocsArticle(app.db, id, data);
+      if (!result)
+        return reply.status(404).send({ ...NOT_FOUND, message: "Docs article not found" });
+      return reply.send(result);
+    },
+  );
+
+  app.delete(
+    "/api/platform/cms/docs/:id",
+    { preHandler: [requireAuth, requirePlatformAdmin] },
+    async (request, reply) => {
+      const { id } = idParam.parse(request.params);
+      await CmsService.deleteCmsDocsArticle(app.db, id);
+      return reply.status(204).send();
     },
   );
 }

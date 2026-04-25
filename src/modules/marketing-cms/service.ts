@@ -9,6 +9,8 @@ import {
   cmsFaqs,
   cmsFeatures,
   cmsHomepageSections,
+  cmsRoadmapItems,
+  cmsDocsArticles,
   type CmsPage,
   type CmsPost,
   type CmsChangelogEntry,
@@ -17,6 +19,8 @@ import {
   type CmsFaq,
   type CmsFeature,
   type CmsHomepageSection,
+  type CmsRoadmapItem,
+  type CmsDocsArticle,
 } from "../../db/schema/marketing-cms.js";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -1331,4 +1335,346 @@ export async function getSitemapData(db: Db): Promise<{
   ]);
 
   return { pages, posts, cases, features, integrations };
+}
+
+// ── Roadmap items ──────────────────────────────────────────────────────────────
+
+export async function listCmsRoadmapItems(
+  db: Db,
+  opts: {
+    status?: string;
+    language?: string;
+    category?: string;
+    quarter?: string;
+    page: number;
+    limit: number;
+  },
+): Promise<{ items: CmsRoadmapItem[]; total: number; page: number; limit: number }> {
+  const conditions = [];
+  if (opts.status)
+    conditions.push(eq(cmsRoadmapItems.status, opts.status as CmsRoadmapItem["status"]));
+  if (opts.language)
+    conditions.push(
+      eq(cmsRoadmapItems.language, opts.language as CmsRoadmapItem["language"]),
+    );
+  if (opts.category) conditions.push(eq(cmsRoadmapItems.category, opts.category));
+  if (opts.quarter) conditions.push(eq(cmsRoadmapItems.quarter, opts.quarter));
+
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [items, countResult] = await Promise.all([
+    db
+      .select()
+      .from(cmsRoadmapItems)
+      .where(where)
+      .orderBy(asc(cmsRoadmapItems.priority))
+      .limit(opts.limit)
+      .offset((opts.page - 1) * opts.limit),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(cmsRoadmapItems)
+      .where(where),
+  ]);
+
+  return { items, total: countResult[0]?.count ?? 0, page: opts.page, limit: opts.limit };
+}
+
+export async function getCmsRoadmapItemBySlug(
+  db: Db,
+  slug: string,
+  language: string,
+): Promise<CmsRoadmapItem | null> {
+  const [row] = await db
+    .select()
+    .from(cmsRoadmapItems)
+    .where(
+      and(
+        eq(cmsRoadmapItems.slug, slug),
+        eq(cmsRoadmapItems.language, language as CmsRoadmapItem["language"]),
+      ),
+    )
+    .limit(1);
+  return row ?? null;
+}
+
+export async function getCmsRoadmapItemById(
+  db: Db,
+  id: string,
+): Promise<CmsRoadmapItem | null> {
+  const [row] = await db
+    .select()
+    .from(cmsRoadmapItems)
+    .where(eq(cmsRoadmapItems.id, id))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function createCmsRoadmapItem(
+  db: Db,
+  data: {
+    slug: string;
+    title: string;
+    status?: "draft" | "published" | "scheduled" | "archived";
+    language?: "sv" | "en" | "pl";
+    category?: string;
+    priority?: number;
+    quarter?: string;
+    body?: string;
+    excerpt?: string;
+    votes?: number;
+    seoTitle?: string;
+    seoDescription?: string;
+    ogImageUrl?: string;
+    canonicalUrl?: string;
+  },
+): Promise<CmsRoadmapItem> {
+  const insert: Record<string, unknown> = {
+    slug: data.slug,
+    title: data.title,
+  };
+
+  if (data.status !== undefined) insert["status"] = data.status;
+  if (data.language !== undefined) insert["language"] = data.language;
+  if (data.category !== undefined) insert["category"] = data.category;
+  if (data.priority !== undefined) insert["priority"] = data.priority;
+  if (data.quarter !== undefined) insert["quarter"] = data.quarter;
+  if (data.body !== undefined) insert["body"] = data.body;
+  if (data.excerpt !== undefined) insert["excerpt"] = data.excerpt;
+  if (data.votes !== undefined) insert["votes"] = data.votes;
+  if (data.seoTitle !== undefined) insert["seoTitle"] = data.seoTitle;
+  if (data.seoDescription !== undefined) insert["seoDescription"] = data.seoDescription;
+  if (data.ogImageUrl !== undefined) insert["ogImageUrl"] = data.ogImageUrl;
+  if (data.canonicalUrl !== undefined) insert["canonicalUrl"] = data.canonicalUrl;
+
+  if (data.status === "published") insert["publishedAt"] = nowPublishedAt();
+
+  const [row] = await db
+    .insert(cmsRoadmapItems)
+    .values(insert as typeof cmsRoadmapItems.$inferInsert)
+    .returning();
+  return row!;
+}
+
+export async function updateCmsRoadmapItem(
+  db: Db,
+  id: string,
+  data: {
+    slug?: string;
+    title?: string;
+    status?: "draft" | "published" | "scheduled" | "archived";
+    language?: "sv" | "en" | "pl";
+    category?: string;
+    priority?: number;
+    quarter?: string;
+    body?: string;
+    excerpt?: string;
+    votes?: number;
+    seoTitle?: string;
+    seoDescription?: string;
+    ogImageUrl?: string;
+    canonicalUrl?: string;
+  },
+): Promise<CmsRoadmapItem | null> {
+  const update: Record<string, unknown> = { updatedAt: new Date() };
+
+  if (data.slug !== undefined) update["slug"] = data.slug;
+  if (data.title !== undefined) update["title"] = data.title;
+  if (data.status !== undefined) update["status"] = data.status;
+  if (data.language !== undefined) update["language"] = data.language;
+  if (data.category !== undefined) update["category"] = data.category;
+  if (data.priority !== undefined) update["priority"] = data.priority;
+  if (data.quarter !== undefined) update["quarter"] = data.quarter;
+  if (data.body !== undefined) update["body"] = data.body;
+  if (data.excerpt !== undefined) update["excerpt"] = data.excerpt;
+  if (data.votes !== undefined) update["votes"] = data.votes;
+  if (data.seoTitle !== undefined) update["seoTitle"] = data.seoTitle;
+  if (data.seoDescription !== undefined) update["seoDescription"] = data.seoDescription;
+  if (data.ogImageUrl !== undefined) update["ogImageUrl"] = data.ogImageUrl;
+  if (data.canonicalUrl !== undefined) update["canonicalUrl"] = data.canonicalUrl;
+
+  if (data.status === "published") {
+    const existing = await getCmsRoadmapItemById(db, id);
+    if (existing && !existing.publishedAt) {
+      update["publishedAt"] = nowPublishedAt();
+    }
+  }
+
+  const [row] = await db
+    .update(cmsRoadmapItems)
+    .set(update as Partial<typeof cmsRoadmapItems.$inferInsert>)
+    .where(eq(cmsRoadmapItems.id, id))
+    .returning();
+  return row ?? null;
+}
+
+export async function deleteCmsRoadmapItem(db: Db, id: string): Promise<void> {
+  await db.delete(cmsRoadmapItems).where(eq(cmsRoadmapItems.id, id));
+}
+
+// ── Docs articles ──────────────────────────────────────────────────────────────
+
+export async function listCmsDocsArticles(
+  db: Db,
+  opts: {
+    status?: string;
+    language?: string;
+    section?: string;
+    page: number;
+    limit: number;
+  },
+): Promise<{ items: CmsDocsArticle[]; total: number; page: number; limit: number }> {
+  const conditions = [];
+  if (opts.status)
+    conditions.push(eq(cmsDocsArticles.status, opts.status as CmsDocsArticle["status"]));
+  if (opts.language)
+    conditions.push(
+      eq(cmsDocsArticles.language, opts.language as CmsDocsArticle["language"]),
+    );
+  if (opts.section) conditions.push(eq(cmsDocsArticles.section, opts.section));
+
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [items, countResult] = await Promise.all([
+    db
+      .select()
+      .from(cmsDocsArticles)
+      .where(where)
+      .orderBy(asc(cmsDocsArticles.sortOrder))
+      .limit(opts.limit)
+      .offset((opts.page - 1) * opts.limit),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(cmsDocsArticles)
+      .where(where),
+  ]);
+
+  return { items, total: countResult[0]?.count ?? 0, page: opts.page, limit: opts.limit };
+}
+
+export async function getCmsDocsArticleBySlug(
+  db: Db,
+  slug: string,
+  language: string,
+): Promise<CmsDocsArticle | null> {
+  const [row] = await db
+    .select()
+    .from(cmsDocsArticles)
+    .where(
+      and(
+        eq(cmsDocsArticles.slug, slug),
+        eq(cmsDocsArticles.language, language as CmsDocsArticle["language"]),
+      ),
+    )
+    .limit(1);
+  return row ?? null;
+}
+
+export async function getCmsDocsArticleById(
+  db: Db,
+  id: string,
+): Promise<CmsDocsArticle | null> {
+  const [row] = await db
+    .select()
+    .from(cmsDocsArticles)
+    .where(eq(cmsDocsArticles.id, id))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function createCmsDocsArticle(
+  db: Db,
+  data: {
+    slug: string;
+    title: string;
+    status?: "draft" | "published" | "scheduled" | "archived";
+    language?: "sv" | "en" | "pl";
+    section?: string;
+    sortOrder?: number;
+    parentId?: string;
+    body?: string;
+    excerpt?: string;
+    seoTitle?: string;
+    seoDescription?: string;
+    ogImageUrl?: string;
+    canonicalUrl?: string;
+  },
+): Promise<CmsDocsArticle> {
+  const insert: Record<string, unknown> = {
+    slug: data.slug,
+    title: data.title,
+  };
+
+  if (data.status !== undefined) insert["status"] = data.status;
+  if (data.language !== undefined) insert["language"] = data.language;
+  if (data.section !== undefined) insert["section"] = data.section;
+  if (data.sortOrder !== undefined) insert["sortOrder"] = data.sortOrder;
+  if (data.parentId !== undefined) insert["parentId"] = data.parentId;
+  if (data.body !== undefined) insert["body"] = data.body;
+  if (data.excerpt !== undefined) insert["excerpt"] = data.excerpt;
+  if (data.seoTitle !== undefined) insert["seoTitle"] = data.seoTitle;
+  if (data.seoDescription !== undefined) insert["seoDescription"] = data.seoDescription;
+  if (data.ogImageUrl !== undefined) insert["ogImageUrl"] = data.ogImageUrl;
+  if (data.canonicalUrl !== undefined) insert["canonicalUrl"] = data.canonicalUrl;
+
+  if (data.status === "published") insert["publishedAt"] = nowPublishedAt();
+
+  const [row] = await db
+    .insert(cmsDocsArticles)
+    .values(insert as typeof cmsDocsArticles.$inferInsert)
+    .returning();
+  return row!;
+}
+
+export async function updateCmsDocsArticle(
+  db: Db,
+  id: string,
+  data: {
+    slug?: string;
+    title?: string;
+    status?: "draft" | "published" | "scheduled" | "archived";
+    language?: "sv" | "en" | "pl";
+    section?: string;
+    sortOrder?: number;
+    parentId?: string;
+    body?: string;
+    excerpt?: string;
+    seoTitle?: string;
+    seoDescription?: string;
+    ogImageUrl?: string;
+    canonicalUrl?: string;
+  },
+): Promise<CmsDocsArticle | null> {
+  const update: Record<string, unknown> = { updatedAt: new Date() };
+
+  if (data.slug !== undefined) update["slug"] = data.slug;
+  if (data.title !== undefined) update["title"] = data.title;
+  if (data.status !== undefined) update["status"] = data.status;
+  if (data.language !== undefined) update["language"] = data.language;
+  if (data.section !== undefined) update["section"] = data.section;
+  if (data.sortOrder !== undefined) update["sortOrder"] = data.sortOrder;
+  if (data.parentId !== undefined) update["parentId"] = data.parentId;
+  if (data.body !== undefined) update["body"] = data.body;
+  if (data.excerpt !== undefined) update["excerpt"] = data.excerpt;
+  if (data.seoTitle !== undefined) update["seoTitle"] = data.seoTitle;
+  if (data.seoDescription !== undefined) update["seoDescription"] = data.seoDescription;
+  if (data.ogImageUrl !== undefined) update["ogImageUrl"] = data.ogImageUrl;
+  if (data.canonicalUrl !== undefined) update["canonicalUrl"] = data.canonicalUrl;
+
+  if (data.status === "published") {
+    const existing = await getCmsDocsArticleById(db, id);
+    if (existing && !existing.publishedAt) {
+      update["publishedAt"] = nowPublishedAt();
+    }
+  }
+
+  const [row] = await db
+    .update(cmsDocsArticles)
+    .set(update as Partial<typeof cmsDocsArticles.$inferInsert>)
+    .where(eq(cmsDocsArticles.id, id))
+    .returning();
+  return row ?? null;
+}
+
+export async function deleteCmsDocsArticle(db: Db, id: string): Promise<void> {
+  await db.delete(cmsDocsArticles).where(eq(cmsDocsArticles.id, id));
 }

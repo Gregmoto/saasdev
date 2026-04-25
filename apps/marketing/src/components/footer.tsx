@@ -17,7 +17,7 @@ const COLS = [
       ["Guider & Resurser", "/resources"],
       ["Nyheter", "/news"],
       ["Blogg", "/blog"],
-      ["Versionshistorik", "/changelog"],
+      ["Dokumentation", "/docs"],
       ["Systemstatus", "/status"],
       ["RSS — Nyheter", "/news/rss"],
     ],
@@ -33,13 +33,24 @@ const COLS = [
       ["Alternativ till PrestaShop", "/alternatives/prestashop"],
     ],
   },
+  {
+    title: "Företag",
+    links: [
+      ["Om oss", "/about"],
+      ["Kontakt", "/contact"],
+      ["Integritetspolicy", "/privacy"],
+      ["Villkor", "/terms"],
+      ["Roadmap", "/roadmap"],
+      ["Dokumentation", "/docs"],
+    ],
+  },
 ];
 
 export function Footer() {
   return (
     <footer className="bg-stone-50 border-t border-stone-100">
       <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-12">
           <div>
             <div className="flex items-center gap-2 mb-4">
               <svg width="16" height="16" viewBox="0 0 14 14" fill="none" className="text-blue-700">
@@ -69,6 +80,7 @@ export function Footer() {
         <div className="mt-16 pt-8 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-stone-400">© {new Date().getFullYear()} ShopMan. Alla rättigheter förbehållna.</p>
           <div className="flex items-center gap-4">
+            <Link href="/about" className="text-xs text-stone-400 hover:text-stone-700 transition-colors">Om oss</Link>
             <Link href="/privacy" className="text-xs text-stone-400 hover:text-stone-700 transition-colors">Integritetspolicy</Link>
             <Link href="/terms" className="text-xs text-stone-400 hover:text-stone-700 transition-colors">Villkor</Link>
           </div>

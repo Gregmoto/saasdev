@@ -380,6 +380,71 @@ export const cmsHomepageSections = pgTable(
   }),
 );
 
+// ── cms_roadmap_items ─────────────────────────────────────────────────────────
+// Public product roadmap (e.g. Q2 2026 planned features)
+
+export const cmsRoadmapItems = pgTable(
+  "cms_roadmap_items",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    slug: varchar("slug", { length: 255 }).notNull(),
+    language: cmsLanguageEnum("language").notNull().default("sv"),
+    title: varchar("title", { length: 255 }).notNull(),
+    status: cmsStatusEnum("status").notNull().default("draft"),
+    category: varchar("category", { length: 100 }),
+    priority: integer("priority").notNull().default(0),
+    quarter: varchar("quarter", { length: 20 }),
+    body: text("body"),
+    excerpt: text("excerpt"),
+    votes: integer("votes").notNull().default(0),
+    seoTitle: varchar("seo_title", { length: 255 }),
+    seoDescription: text("seo_description"),
+    ogImageUrl: text("og_image_url"),
+    canonicalUrl: text("canonical_url"),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    slugLangUnique: uniqueIndex("cms_roadmap_slug_lang_unique").on(t.slug, t.language),
+    statusIdx: index("cms_roadmap_status_idx").on(t.status),
+    categoryIdx: index("cms_roadmap_category_idx").on(t.category),
+    quarterIdx: index("cms_roadmap_quarter_idx").on(t.quarter),
+  }),
+);
+
+// ── cms_docs_articles ─────────────────────────────────────────────────────────
+// Documentation hub articles (self-referencing for nested sections)
+
+export const cmsDocsArticles = pgTable(
+  "cms_docs_articles",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    slug: varchar("slug", { length: 255 }).notNull(),
+    language: cmsLanguageEnum("language").notNull().default("sv"),
+    title: varchar("title", { length: 255 }).notNull(),
+    status: cmsStatusEnum("status").notNull().default("draft"),
+    section: varchar("section", { length: 100 }),
+    sortOrder: integer("sort_order").notNull().default(0),
+    parentId: uuid("parent_id"),
+    body: text("body"),
+    excerpt: text("excerpt"),
+    seoTitle: varchar("seo_title", { length: 255 }),
+    seoDescription: text("seo_description"),
+    ogImageUrl: text("og_image_url"),
+    canonicalUrl: text("canonical_url"),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    slugLangUnique: uniqueIndex("cms_docs_slug_lang_unique").on(t.slug, t.language),
+    statusIdx: index("cms_docs_status_idx").on(t.status),
+    sectionIdx: index("cms_docs_section_idx").on(t.section),
+    parentIdIdx: index("cms_docs_parent_id_idx").on(t.parentId),
+  }),
+);
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export type CmsPage = typeof cmsPages.$inferSelect;
@@ -390,5 +455,7 @@ export type CmsIntegration = typeof cmsIntegrations.$inferSelect;
 export type CmsFaq = typeof cmsFaqs.$inferSelect;
 export type CmsFeature = typeof cmsFeatures.$inferSelect;
 export type CmsHomepageSection = typeof cmsHomepageSections.$inferSelect;
+export type CmsRoadmapItem = typeof cmsRoadmapItems.$inferSelect;
+export type CmsDocsArticle = typeof cmsDocsArticles.$inferSelect;
 export type CmsStatus = (typeof cmsStatusEnum.enumValues)[number];
 export type CmsLanguage = (typeof cmsLanguageEnum.enumValues)[number];

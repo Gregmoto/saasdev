@@ -9,7 +9,14 @@ const LINKS = [
   { label: "Priser", href: "/pricing" },
   { label: "Resurser", href: "/resources" },
   { label: "Nyheter", href: "/news" },
+  { label: "Om oss", href: "/about" },
   { label: "Demo", href: "/demo" },
+];
+
+const COMPANY_LINKS = [
+  { label: "Om oss", href: "/about" },
+  { label: "Dokumentation", href: "/docs" },
+  { label: "Kontakt", href: "/contact" },
 ];
 
 export function Nav() {
@@ -92,6 +99,14 @@ export function Nav() {
               {l.label}
             </Link>
           ))}
+          <div className="pt-3 mt-3 border-t border-stone-100 space-y-1">
+            <div className="text-xs font-semibold text-stone-400 uppercase tracking-widest px-3 pt-1 pb-1">Företag</div>
+            {COMPANY_LINKS.filter(l => !LINKS.find(m => m.href === l.href)).map(l => (
+              <Link key={l.href} href={l.href} className="block px-3 py-2 rounded-md text-sm text-stone-600 hover:bg-stone-50 hover:text-stone-900" onClick={() => setOpen(false)}>
+                {l.label}
+              </Link>
+            ))}
+          </div>
           <div className="pt-3 mt-3 border-t border-stone-100 flex flex-col gap-2">
             <Link href="https://admin-production-42ec.up.railway.app/login" className="text-sm text-stone-500 px-3 py-2">Logga in</Link>
             <Link href="/book-demo" className="text-sm text-stone-600 px-3 py-2">Boka demo</Link>
