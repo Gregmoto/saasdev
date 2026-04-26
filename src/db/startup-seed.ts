@@ -6,6 +6,7 @@
  * lives in migrate-and-seed.ts which is run manually.
  */
 import postgres from "postgres";
+import { Redis } from "ioredis";
 import { hashPassword } from "../lib/password.js";
 
 const SUPER_EMAIL = "info@gregmoto.se";
@@ -19,6 +20,22 @@ export async function runStartupSeed(): Promise<void> {
   }
 
   const sql = postgres(DB_URL, { max: 1, onnotice: () => {} });
+
+  // Clear brute-force lockout for the super-admin email so failed attempts
+  // from previous deploys don't block the account after a fix is deployed.
+  const REDIS_URL = process.env["REDIS_URL"];
+  if (REDIS_URL) {
+    try {
+      const redis = new Redis(REDIS_URL, { lazyConnect: true, enableReadyCheck: false });
+      await redis.connect();
+      const emailLower = SUPER_EMAIL.toLowerCase();
+      await redis.del(`auth:locked:${emailLower}`, `auth:fails:${emailLower}`);
+      await redis.quit();
+      console.log("[startup-seed] Cleared lockout keys for super-admin");
+    } catch {
+      // Non-fatal — Redis might be briefly unavailable on startup
+    }
+  }
 
   try {
     // 1. Ensure platform-admin store account
