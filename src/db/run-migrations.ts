@@ -1,40 +1,73 @@
 /**
- * Runs all pending Drizzle migrations at API startup.
+ * Simple SQL-file migration runner — no drizzle journal needed.
  *
- * Uses drizzle-orm's built-in migrator so it is idempotent — already-applied
- * migrations are skipped. Safe to run on every boot.
+ * Creates a __migrations table to track which files have been applied,
+ * then runs any .sql files in src/db/migrations/ that haven't been run yet.
+ * Safe and idempotent — runs on every API boot.
  */
+import { readdir, readFile } from "fs/promises";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import postgres from "postgres";
-import { drizzle } from "drizzle-orm/postgres-js";
-import { migrate } from "drizzle-orm/postgres-js/migrator";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export async function runMigrations(): Promise<void> {
   const DB_URL = process.env["DATABASE_URL"];
   if (!DB_URL) {
-    console.warn("[migrations] DATABASE_URL not set — skipping migrations");
+    console.warn("[migrations] DATABASE_URL not set — skipping");
     return;
   }
 
   const sql = postgres(DB_URL, { max: 1, onnotice: () => {} });
-  const db = drizzle(sql);
-
-  const migrationsFolder = resolve(__dirname, "migrations");
 
   try {
-    console.log("[migrations] Running pending migrations…");
-    await migrate(db, { migrationsFolder });
-    console.log("[migrations] All migrations applied ✓");
+    // Create tracking table if it doesn't exist
+    await sql`
+      CREATE TABLE IF NOT EXISTS __migrations (
+        name TEXT PRIMARY KEY,
+        applied_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      )
+    `;
+
+    // Read all .sql files sorted alphabetically
+    const migrationsDir = resolve(__dirname, "migrations");
+    const files = (await readdir(migrationsDir))
+      .filter((f) => f.endsWith(".sql"))
+      .sort();
+
+    // Get already-applied migrations
+    const applied = await sql<Array<{ name: string }>>`
+      SELECT name FROM __migrations
+    `;
+    const appliedSet = new Set(applied.map((r) => r.name));
+
+    let count = 0;
+    for (const file of files) {
+      if (appliedSet.has(file)) continue;
+
+      const sqlContent = await readFile(resolve(migrationsDir, file), "utf-8");
+
+      console.log(`[migrations] Applying ${file}…`);
+      // Run each migration in its own transaction
+      await sql.begin(async (tx) => {
+        await tx.unsafe(sqlContent);
+        await tx`INSERT INTO __migrations (name) VALUES (${file})`;
+      });
+      count++;
+    }
+
+    if (count === 0) {
+      console.log("[migrations] Schema up to date ✓");
+    } else {
+      console.log(`[migrations] Applied ${count} migration(s) ✓`);
+    }
   } catch (err) {
-    // Fatal — if migrations fail the server shouldn't start with a broken schema.
     console.error(
-      "[migrations] Migration failed:",
+      "[migrations] Failed:",
       err instanceof Error ? err.message : String(err),
     );
-    throw err;
+    throw err; // Fatal — don't start with broken schema
   } finally {
     await sql.end();
   }
